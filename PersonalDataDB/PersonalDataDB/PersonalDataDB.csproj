@@ -15,19 +15,29 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Include="Data\Models\AgreementRepositoryModel.cs" />
-    <Compile Include="Data\Models\AgreementProofRepositoryModel.cs" />
-    <Compile Include="Data\Models\AgreementTextRepositoryModel.cs" />
-    <Compile Include="Data\Models\ConfigurationRepositoryModel.cs" />
-    <Compile Include="Data\Models\Language.cs" />
-    <Compile Include="Data\Models\SystemLogRepositoryModel.cs" />
+    <Compile Remove="Agreement.cs" />
+    <Compile Remove="AgreementProof.cs" />
+    <Compile Remove="AutoMapperProfile.cs" />
+    <Compile Remove="Configuration.cs" />
+    <Compile Remove="DefaultDateTimeProvider.cs" />
+    <Compile Remove="Extensions.cs" />
+    <Compile Remove="IDateTimeProvider.cs" />
+    <Compile Remove="IdDict.cs" />
+    <Compile Remove="IPersonalDataValue.cs" />
+    <Compile Remove="IRepository.cs" />
+    <Compile Remove="Language.cs" />
+    <Compile Remove="LocalizedText.cs" />
+    <Compile Remove="PersonalDataAccess.cs" />
+    <Compile Remove="PersonalDataAdministration.cs" />
+    <Compile Remove="PersonalDataDatabase.cs" />
+    <Compile Remove="Scope.cs" />
+    <Compile Remove="WorkUserFacade.cs" />
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="AutoMapper" Version="8.0.0" />
     <PackageReference Include="Dapper" Version="1.50.7" />
     <PackageReference Include="Dapper.Contrib" Version="1.50.7" />
-    <PackageReference Include="System.Data.SQLite.Core" Version="1.0.109.2" />
+    <PackageReference Include="Newtonsoft.Json" Version="12.0.1" />
   </ItemGroup>
 
 </Project>

@@ -1,7 +1,9 @@
-using NUnit.Framework;
-
 namespace Tests
 {
+    using Newtonsoft.Json;
+    using NUnit.Framework;
+    using PersonalDataDB.Domain;
+
     public class Tests
     {
         [SetUp]
@@ -12,7 +14,9 @@ namespace Tests
         [Test]
         public void Test1()
         {
-            Assert.Pass();
+            var d = new PersonalDataDatabaseDomain("123", "cs-CZ");
+            string json = JsonConvert.SerializeObject(d);
+            
         }
     }
 }
