@@ -1,14 +1,13 @@
 ﻿namespace PersonalDataDB
 {
-    using Dapper.Contrib.Extensions;
+    using System.Collections.Generic;
+    using System.Linq;
 
-    public class Agreement 
+    public class Agreement
     {
-        [Key]
         public int ID { get; set; }
-        public int? OwnerID { get; set; }
-        public int? RowID { get; set; }
-        public string Table { get; set; }
-        public string Column { get; set; }
+        public Scope Scope { get; set; }
+        public IEnumerable<AgreementProof> Proofs { get; set; } = Enumerable.Empty<AgreementProof>();
+        public IEnumerable<LocalizedText> LocalizedText { get; set; } = Enumerable.Empty<LocalizedText>();
     }
 }

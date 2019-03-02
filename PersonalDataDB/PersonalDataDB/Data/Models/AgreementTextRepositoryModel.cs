@@ -1,8 +1,8 @@
-﻿namespace PersonalDataDB
+﻿namespace PersonalDataDB.Data.Models
 {
     using Dapper.Contrib.Extensions;
 
-    public class AgreementText 
+    public class AgreementTextRepositoryModel 
     {
         [Key]
         public int ID { get; set; }

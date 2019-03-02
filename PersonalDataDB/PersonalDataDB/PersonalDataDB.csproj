@@ -9,9 +9,25 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Data\**" />
+    <EmbeddedResource Remove="Data\**" />
+    <None Remove="Data\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Include="Data\Models\AgreementRepositoryModel.cs" />
+    <Compile Include="Data\Models\AgreementProofRepositoryModel.cs" />
+    <Compile Include="Data\Models\AgreementTextRepositoryModel.cs" />
+    <Compile Include="Data\Models\ConfigurationRepositoryModel.cs" />
+    <Compile Include="Data\Models\Language.cs" />
+    <Compile Include="Data\Models\SystemLogRepositoryModel.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="AutoMapper" Version="8.0.0" />
     <PackageReference Include="Dapper" Version="1.50.7" />
     <PackageReference Include="Dapper.Contrib" Version="1.50.7" />
-    <PackageReference Include="System.Data.SQLite" Version="1.0.109.2" />
+    <PackageReference Include="System.Data.SQLite.Core" Version="1.0.109.2" />
   </ItemGroup>
 
 </Project>

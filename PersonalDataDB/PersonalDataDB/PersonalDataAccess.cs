@@ -2,9 +2,9 @@
 
 namespace PersonalDataDB
 {
-    public class PersonalDataManipulation
+    public class PersonalDataAccess
     {
-        internal PersonalDataManipulation(System.Data.IDbConnection dbConnection) { }
+        internal PersonalDataAccess(System.Data.IDbConnection dbConnection) { }
 
         // čtu vlastní data jako vlastník
         // Data se normálně vytáhnou z databáze

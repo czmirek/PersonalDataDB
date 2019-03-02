@@ -1,8 +1,6 @@
-﻿using System;
-
-namespace PersonalDataDB
+﻿namespace PersonalDataDB.Data.Models
 {
-    public class Configuration
+    public class ConfigurationRepositoryModel
     {
         public string CompanyName { get; set; }
         public string CompanyAddress { get; set; }
@@ -15,9 +13,8 @@ namespace PersonalDataDB
         public string AdministratorEmail { get; set; }
 
         public string PersonalDataResponsibleContact { get; set; }
-
+        public bool ConfigurationIsSet { get; set; }
         public int NumberOfRequiredAgreementProofs { get; set; }
         public bool RequireOwnerInAgreementProofs { get; set; }
-
     }
 }
