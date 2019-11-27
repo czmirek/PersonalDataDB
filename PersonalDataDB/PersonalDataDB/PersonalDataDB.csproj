@@ -4,6 +4,8 @@
     <TargetFramework>netcoreapp3.0</TargetFramework>
     <Nullable>enable</Nullable>
     <WarningsAsErrors>CS8600;CS8602;CS8603;CS8618;CS8625</WarningsAsErrors>
+    <AssemblyVersion>19.11.27.7</AssemblyVersion>
+    <FileVersion>19.11.27.7</FileVersion>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
@@ -40,6 +42,10 @@
     <PackageReference Include="Dapper" Version="1.50.7" />
     <PackageReference Include="Dapper.Contrib" Version="1.50.7" />
     <PackageReference Include="Newtonsoft.Json" Version="12.0.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="DataStructure\Default\" />
   </ItemGroup>
 
 </Project>

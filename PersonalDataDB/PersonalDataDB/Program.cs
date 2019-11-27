@@ -30,6 +30,17 @@ namespace PersonalDataDB
                         });
                    })
                    .Build();
+
+            pddb.Insert("Persons", new Dictionary<string, object?>()
+            {
+                { "Name", "Karel" },
+                { "Birthday", DateTime.Now.AddYears(-30) },
+                { "NumberOfLimbs", 5 },
+                { "HomeLatitude", 2.46876846 },
+                { "BankAccount", 1005.50M },
+                { "IsGood", true },
+                { "DefaultPhoneID", null }
+            });
         }
     }
 }

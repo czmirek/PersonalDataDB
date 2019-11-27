@@ -6,10 +6,16 @@
 
     public class DefaultTableBuilder : ITableBuilder
     {
-        internal List<TableSpecification> Tables { get; private set; } = new List<TableSpecification>();
+        internal List<DefaultTable> Tables { get; private set; } = new List<DefaultTable>();
         public void Add(string tableName, Action<IColumnBuilder> columnBuilder)
         {
-            TableSpecification newTable = new TableSpecification(tableName);
+            if (Tables.Any(tbl => tbl.TableName == tableName))
+                throw new TableBuilderException($"Duplicate table \"{tableName}\"");
+
+            if(tableName.IsEmptyOrWhiteSpace())
+                throw new TableBuilderException($"Table \"{tableName}\" must not be empty or contain whitespace.");
+
+            DefaultTable newTable = new DefaultTable(tableName);
             columnBuilder.Invoke(newTable);
 
             Tables.Add(newTable);

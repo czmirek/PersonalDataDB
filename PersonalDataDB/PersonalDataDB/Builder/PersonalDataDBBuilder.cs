@@ -5,12 +5,17 @@ namespace PersonalDataDB
     public class PersonalDataDBBuilder
     {
         private IDataProvider? dataProvider = null;
-        private DefaultTableBuilder defaultTableBuilder = new DefaultTableBuilder();
+        private DefaultTableBuilder dataStructureAndBuilder = new DefaultTableBuilder();
 
         public PersonalDataDB Build()
         {
-            DefaultTableBuilderValidator validator = new DefaultTableBuilderValidator();
-            validator.Validate(defaultTableBuilder);
+            if (dataProvider == null)
+                throw new PersonalDataDBException($"Data provider is not specified");
+
+            dataProvider.UseStructure(dataStructureAndBuilder.Tables);
+
+            return new PersonalDataDB(dataProvider, dataStructureAndBuilder.Tables);
+            
         }
 
         public PersonalDataDBBuilder UseDataProvider(IDataProvider dataProvider)
@@ -21,7 +26,7 @@ namespace PersonalDataDB
 
         public PersonalDataDBBuilder ConfigureTables(Action<ITableBuilder> tableBuilder)
         {
-            tableBuilder.Invoke(defaultTableBuilder);
+            tableBuilder.Invoke(dataStructureAndBuilder);
             return this;
         }
     }
