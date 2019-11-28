@@ -4,14 +4,14 @@ using Xunit;
 
 namespace PersonalDataDB.Test
 {
-    public class UnitTest1
+    public class DevTests
     {
-        [Fact]
-        public void Test1()
+        private PersonalDataDB pddb;
+        public DevTests()
         {
             PersonalDataDBBuilder builder = new PersonalDataDBBuilder();
-            PersonalDataDB pddb = builder
-                   .UseDataProvider(new InMemoryDataProvider())
+            this.pddb = builder
+                   .UseDataProvider(dataSet => new InMemoryDataProvider(dataSet))
                    .ConfigureTables(tables =>
                    {
                        tables.Add("Persons", columns =>
@@ -32,7 +32,10 @@ namespace PersonalDataDB.Test
                        });
                    })
                    .Build();
-
+        }
+        [Fact]
+        public void InsertsAndReads()
+        {
             var insertRow = new Dictionary<string, object?>()
             {
                 { "Name", "Karel" },
@@ -48,16 +51,37 @@ namespace PersonalDataDB.Test
 
             Assert.NotNull(rowKey);
 
-            var readRowKvp = pddb.ReadRow("Persons", rowKey);
-            var readRow = new Dictionary<string, object?>(readRowKvp);
+            var readRow = new Dictionary<string, object?>(pddb.ReadRow("Persons", rowKey));
+
+            pddb.Update("Persons", rowKey, "IsGood", false);
+            pddb.Update("Persons", rowKey, new Dictionary<string, object?>()
+            {
+                { "Name", "Karel Varel" },
+                { "HomeLatitude", 3.798846}
+            });
+
+            var readRow2 = new Dictionary<string, object?>(pddb.ReadRow("Persons", rowKey));
 
             Assert.Equal(insertRow["Name"], readRow["Name"]);
+            Assert.Equal("Karel Varel", readRow2["Name"]);
+
             Assert.Equal(insertRow["Birthday"], readRow["Birthday"]);
             Assert.Equal(insertRow["NumberOfLimbs"], readRow["NumberOfLimbs"]);
+            
             Assert.Equal(insertRow["HomeLatitude"], readRow["HomeLatitude"]);
+            Assert.Equal(3.798846, readRow2["HomeLatitude"]);
+
             Assert.Equal(insertRow["BankAccount"], readRow["BankAccount"]);
+            
             Assert.Equal(insertRow["IsGood"], readRow["IsGood"]);
+            Assert.Equal(false, readRow2["IsGood"]);
+
             Assert.Equal(insertRow["DefaultPhoneID"], readRow["DefaultPhoneID"]);
+
+            var readCols3 = pddb.ReadRow("Persons", rowKey, new string[] { "Birthday", "NumberOfLimbs" });
+
+            Assert.Equal(insertRow["Birthday"], readCols3["Birthday"]);
+            Assert.Equal(insertRow["NumberOfLimbs"], readCols3["NumberOfLimbs"]);
         }
     }
 }

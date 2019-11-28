@@ -2,14 +2,14 @@
 {
     using System;
     using System.Collections.Generic;
-    using System.Linq;
 
-    public class DefaultTableBuilder : ITableBuilder
+    public class DefaultTableBuilder : ITableSet, ITableBuilder
     {
-        internal List<DefaultTable> Tables { get; private set; } = new List<DefaultTable>();
+        public ITableDefinition this[string tableName] => Tables[tableName];
+        internal Dictionary<string, DefaultTable> Tables { get; private set; } = new Dictionary<string, DefaultTable>();
         public void Add(string tableName, Action<IColumnBuilder> columnBuilder)
         {
-            if (Tables.Any(tbl => tbl.TableName == tableName))
+            if (Tables.ContainsKey(tableName))
                 throw new TableBuilderException($"Duplicate table \"{tableName}\"");
 
             if(tableName.IsEmptyOrWhiteSpace())
@@ -18,7 +18,8 @@
             DefaultTable newTable = new DefaultTable(tableName);
             columnBuilder.Invoke(newTable);
 
-            Tables.Add(newTable);
+            Tables.Add(newTable.TableName, newTable);
         }
+        IEnumerable<ITableDefinition> ITableSet.Tables => Tables.Values;
     }
 }

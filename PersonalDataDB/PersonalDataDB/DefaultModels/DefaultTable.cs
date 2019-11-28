@@ -9,13 +9,27 @@
         public DefaultPrimaryKey Key { get; private set; }
         internal List<DefaultScalarColumn> ScalarColumns { get; private set; } = new List<DefaultScalarColumn>();
         internal List<DefaultForeignKey> ForeignKeys { get; private set; } = new List<DefaultForeignKey>();
-
         IPrimaryKeyDefinition ITableDefinition.PrimaryKey => Key;
-
         IEnumerable<IScalarColumnDefinition> ITableDefinition.ScalarColumns => ScalarColumns;
 
         IEnumerable<IForeignKeyDefinition> ITableDefinition.ForeignKeys => ForeignKeys;
+        public IColumnDefinition this[string columnName]
+        {
+            get
+            {
+                IColumnDefinition? colDef = null;
+                colDef = (IColumnDefinition)ScalarColumns.FirstOrDefault(sc => sc.ColumnName == columnName)
+                      ?? (IColumnDefinition)ForeignKeys.FirstOrDefault(fk => fk.ColumnName == columnName) 
+                      ?? (Key.ColumnName == columnName ? Key : null);
 
+                if (colDef == null)
+                    throw new PersonalDataDBException($"Column {columnName} does not exist");
+
+                return colDef;
+            }
+        }
+        
+        
         internal DefaultTable(string tableName)
         {
             TableName = tableName;

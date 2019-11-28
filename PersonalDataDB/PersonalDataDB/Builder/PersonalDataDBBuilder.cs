@@ -6,16 +6,24 @@ namespace PersonalDataDB
     {
         private IDataProvider? dataProvider = null;
         private DefaultTableBuilder dataStructureAndBuilder = new DefaultTableBuilder();
+        private Func<ITableSet, IDataProvider>? dataProviderDelegate = null;
 
         public PersonalDataDB Build()
         {
+            if (dataProviderDelegate != null)
+                dataProvider = dataProviderDelegate(dataStructureAndBuilder);
+
             if (dataProvider == null)
                 throw new PersonalDataDBException($"Data provider is not specified");
 
-            dataProvider.UseStructure(dataStructureAndBuilder.Tables);
-
-            return new PersonalDataDB(dataProvider, dataStructureAndBuilder.Tables);
+            return new PersonalDataDB(dataProvider, dataStructureAndBuilder);
             
+        }
+
+        public PersonalDataDBBuilder UseDataProvider(Func<ITableSet, IDataProvider> dataProviderDelegate)
+        {
+            this.dataProviderDelegate = dataProviderDelegate;
+            return this;
         }
 
         public PersonalDataDBBuilder UseDataProvider(IDataProvider dataProvider)

@@ -5,7 +5,7 @@ VisualStudioVersion = 16.0.29509.3
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PersonalDataDB", "PersonalDataDB\PersonalDataDB.csproj", "{C23D3A00-C12A-4916-9C4F-C7DAB9601193}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PersonalDataDB.Test", "PersonalDataDB.Test\PersonalDataDB.Test.csproj", "{A92AFEA7-0301-468C-ACA5-4EC11A4AAC75}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PersonalDataDB.Test", "PersonalDataDB.Test\PersonalDataDB.Test.csproj", "{A92AFEA7-0301-468C-ACA5-4EC11A4AAC75}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

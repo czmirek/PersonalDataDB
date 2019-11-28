@@ -7,73 +7,43 @@
 
     public class InMemoryDataProvider : IDataProvider
     {
-        private DataSet? dataSet = null;
-        public void UseStructure(IEnumerable<ITableDefinition> tables)
+        private DataSet dataSet;
+
+        public InMemoryDataProvider(ITableSet tableSet)
         {
-            dataSet = new DataSet();
-
-            foreach (ITableDefinition table in tables)
-            {
-                DataTable dataTable = new DataTable(table.TableName);
-                DataColumn pkColumn = new DataColumn()
-                {
-                    DataType = typeof(int),
-                    ColumnName = table.PrimaryKey.ColumnName,
-                    AutoIncrement = true,
-                    AutoIncrementSeed = 1,
-                    ReadOnly = true,
-                    Unique = true
-                };
-
-                dataTable.Columns.Add(pkColumn);
-
-                foreach (IScalarColumnDefinition sc in table.ScalarColumns)
-                {
-                    DataColumn scData = new DataColumn()
-                    {
-                        ColumnName = sc.ColumnName,
-                        DataType = GetCodeType(sc.ColumnType),
-                        AllowDBNull = sc.IsNullable
-                    };
-                    dataTable.Columns.Add(scData);
-                }
-
-                foreach (IForeignKeyDefinition fk in table.ForeignKeys)
-                {
-                    DataColumn fkData = new DataColumn()
-                    {
-                        ColumnName = fk.ColumnName,
-                        DataType = typeof(int),
-                        AllowDBNull = fk.IsNullable,
-                    };
-                    dataTable.Columns.Add(fkData);
-                }
-
-                dataSet.Tables.Add(dataTable);
-            }
+            var converter = new TableSetConverter();
+            this.dataSet = converter.Convert(tableSet);
         }
-
-        public object Insert(string tableName, IEnumerable<KeyValuePair<string, object?>> dictionary)
+        
+        public object Insert(string tableName, IDictionary<string, object?> data)
         {
-            if (dataSet == null)
-                throw new InvalidOperationException("InMemoryDataProvider must be initialized first with UseStructure");
-
             DataTable tbl = dataSet.Tables[tableName];
 
             DataRow dataRow = tbl.NewRow();
-            foreach (KeyValuePair<string, object?> row in dictionary)
+            foreach (KeyValuePair<string, object?> row in data)
                 dataRow[row.Key] = row.Value ?? DBNull.Value;
 
             tbl.Rows.Add(dataRow);
 
             return dataRow[0];
         }
-
-        public IEnumerable<KeyValuePair<string, object?>> ReadRow(string tableName, object rowKey)
+        public void UpdateRow(string tableName, object rowKey, IDictionary<string, object?> data)
         {
-            if (dataSet == null)
-                throw new InvalidOperationException("InMemoryDataProvider must be initialized first with UseStructure");
+            DataTable dt = dataSet.Tables[tableName];
+            string pkName = dt.Columns[0].ColumnName;
 
+            DataRow[] foundRows = dt.Select($"{pkName} = {rowKey}");
+
+            if (foundRows.Length == 0)
+                return;
+
+            foreach (KeyValuePair<string, object?> updateData in data)
+                foundRows[0][updateData.Key] = updateData.Value;
+        }
+
+
+        public IDictionary<string, object?> ReadRow(string tableName, object rowKey)
+        {
             DataTable dt = dataSet.Tables[tableName];
             string pkName = dt.Columns[0].ColumnName;
             DataRow[] foundRows = dt.Select($"{pkName} = {rowKey}");
@@ -89,26 +59,48 @@
                 if (dc == null)
                     continue;
 
-                object? value = null;
-                if (!(foundRows[0][dc] is DBNull))
-                    value = foundRows[0][dc];
-
-                returnDict.Add(dc.ColumnName, value);
+                returnDict.Add(dc.ColumnName, GetDbValue(foundRows[0][dc]));
             }
 
             return returnDict;
         }
 
-        private Type GetCodeType(ColumnType columnType) 
-            => columnType switch
+
+        public IDictionary<string, object?> ReadRow(string tableName, object rowKey, IEnumerable<string> requiredColumns)
+        {
+            DataTable dt = dataSet.Tables[tableName];
+            string pkName = dt.Columns[0].ColumnName;
+            var returnDictionary = new Dictionary<string, object?>();
+            
+            DataRow[] foundRows = dt.Select($"{pkName} = {rowKey}");
+
+            foreach (DataColumn? dc in dt.Columns)
             {
-                ColumnType.Bool => typeof(bool),
-                ColumnType.DateTime => typeof(DateTime),
-                ColumnType.Decimal => typeof(decimal),
-                ColumnType.Double => typeof(double),
-                ColumnType.Integer => typeof(int),
-                ColumnType.String => typeof(string),
-                _ => throw new NotImplementedException($"Unknown column type {columnType}")
-            };
+                if (dc == null)
+                    continue;
+
+                if (requiredColumns.Contains(dc.ColumnName))
+                    returnDictionary.Add(dc.ColumnName, GetDbValue(foundRows[0][dc]));
+            }
+
+            return returnDictionary;
+        }
+
+        public object? ReadValue(string tableName, object rowKey, string column)
+        {
+            DataTable dt = dataSet.Tables[tableName];
+            string pkName = dt.Columns[0].ColumnName;
+            DataRow[] foundRows = dt.Select($"{pkName} = {rowKey}");
+
+            return GetDbValue(foundRows[0][column]);
+        }
+
+        private object? GetDbValue(object dbValue)
+        {
+            if (dbValue is DBNull)
+                return null;
+            else
+                return dbValue;
+        }
     }
 }

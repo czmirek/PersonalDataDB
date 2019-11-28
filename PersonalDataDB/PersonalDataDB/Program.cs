@@ -9,7 +9,7 @@ namespace PersonalDataDB
         {
             PersonalDataDBBuilder builder = new PersonalDataDBBuilder();
             PersonalDataDB pddb = builder
-                   .UseDataProvider(new InMemoryDataProvider())
+                   .UseDataProvider(dataSet => new InMemoryDataProvider(dataSet))
                    .ConfigureTables(tables =>
                    {
                         tables.Add("Persons", columns =>

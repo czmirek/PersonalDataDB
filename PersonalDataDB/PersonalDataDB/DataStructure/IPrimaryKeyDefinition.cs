@@ -1,7 +1,6 @@
 ﻿namespace PersonalDataDB
 {
-    public interface IPrimaryKeyDefinition
+    public interface IPrimaryKeyDefinition : IColumnDefinition
     {
-        string ColumnName { get; }
     }
 }
