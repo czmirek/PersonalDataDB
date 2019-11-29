@@ -9,7 +9,6 @@ namespace PersonalDataDB
         IEnumerable<IScalarColumnDefinition> ScalarColumns { get; }
         IEnumerable<IForeignKeyDefinition> ForeignKeys { get; }
         IColumnDefinition this[string columnName] { get; }
-
         IEnumerable<IColumnDefinition> AllColumns { get; }
     }
 }

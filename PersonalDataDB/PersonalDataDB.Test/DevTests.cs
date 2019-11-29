@@ -11,7 +11,7 @@ namespace PersonalDataDB.Test
         {
             PersonalDataDBBuilder builder = new PersonalDataDBBuilder();
             this.pddb = builder
-                   .UseDataProvider(dataSet => new InMemoryDataProvider(dataSet))
+                   .UseDataProvider(tableSet => new InMemoryDataProvider(tableSet))
                    .ConfigureTables(tables =>
                    {
                        tables.Add("Persons", columns =>
@@ -31,8 +31,14 @@ namespace PersonalDataDB.Test
                            columns.AddForeignKey("PersonID", "Persons", isNullable: false);
                        });
                    })
+                   /*
+                   .CreateDatabase()
+                   .CreateDatabaseIfNotExist()
+                   .UpdateDatabase()*/
                    .Build();
+
         }
+        
         [Fact]
         public void InsertsAndReads()
         {
@@ -82,6 +88,31 @@ namespace PersonalDataDB.Test
 
             Assert.Equal(insertRow["Birthday"], readCols3["Birthday"]);
             Assert.Equal(insertRow["NumberOfLimbs"], readCols3["NumberOfLimbs"]);
+        }
+
+        [Fact]
+        public void ForeignKeys()
+        {
+            var person = new Dictionary<string, object?>()
+            {
+                { "Name", "Karel" },
+                { "Birthday", DateTime.Now.AddYears(-30) },
+                { "NumberOfLimbs", 5 },
+                { "HomeLatitude", 2.46876846 },
+                { "BankAccount", 1005.50M },
+                { "IsGood", true },
+                { "DefaultPhoneID", null }
+            };
+
+            object rowKey = pddb.Insert("Persons", person);
+
+            var phone = new Dictionary<string, object?>()
+            {
+                {"Number", "123456789"},
+                {"PersonID", rowKey }
+            };
+
+            pddb.Insert("PhoneNumbers", phone);
         }
     }
 }

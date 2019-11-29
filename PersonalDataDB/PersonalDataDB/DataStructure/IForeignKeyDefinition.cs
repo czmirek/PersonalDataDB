@@ -1,8 +1,7 @@
 ﻿namespace PersonalDataDB
 {
-    public interface IForeignKeyDefinition : IColumnDefinition
+    public interface IForeignKeyDefinition : INullableColumnDefinition
     {
         string TableReference { get; }
-        bool IsNullable { get; }
     }
 }

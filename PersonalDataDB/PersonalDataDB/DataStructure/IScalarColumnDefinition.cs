@@ -1,8 +1,7 @@
 ﻿namespace PersonalDataDB
 {
-    public interface IScalarColumnDefinition : IColumnDefinition
+    public interface IScalarColumnDefinition : INullableColumnDefinition
     {
         ColumnType ColumnType { get; }
-        bool IsNullable { get; }
     }
 }

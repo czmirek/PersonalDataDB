@@ -5,8 +5,8 @@
     <Nullable>enable</Nullable>
     <WarningsAsErrors>CS8600;CS8602;CS8603;CS8618;CS8625</WarningsAsErrors>
     <IsPackable>false</IsPackable>
-    <AssemblyVersion>19.11.28.18</AssemblyVersion>
-    <FileVersion>19.11.28.18</FileVersion>
+    <AssemblyVersion>19.11.29.24</AssemblyVersion>
+    <FileVersion>19.11.29.24</FileVersion>
   </PropertyGroup>
 
   <ItemGroup>

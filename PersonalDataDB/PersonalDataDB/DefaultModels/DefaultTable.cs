@@ -13,19 +13,30 @@
         IEnumerable<IScalarColumnDefinition> ITableDefinition.ScalarColumns => ScalarColumns;
 
         IEnumerable<IForeignKeyDefinition> ITableDefinition.ForeignKeys => ForeignKeys;
+        public IEnumerable<IColumnDefinition> AllColumns
+        {
+            get
+            {
+                yield return Key;
+                
+                foreach (var scalarColumn in ScalarColumns)
+                    yield return scalarColumn;
+
+                foreach (var fkColumn in ForeignKeys)
+                    yield return fkColumn;
+            }
+        }
+
         public IColumnDefinition this[string columnName]
         {
             get
             {
-                IColumnDefinition? colDef = null;
-                colDef = (IColumnDefinition)ScalarColumns.FirstOrDefault(sc => sc.ColumnName == columnName)
-                      ?? (IColumnDefinition)ForeignKeys.FirstOrDefault(fk => fk.ColumnName == columnName) 
-                      ?? (Key.ColumnName == columnName ? Key : null);
-
-                if (colDef == null)
+                IColumnDefinition? foundColumn = AllColumns.FirstOrDefault(c => c.ColumnName.Equals(columnName, System.StringComparison.InvariantCulture));
+                
+                if (foundColumn == null)
                     throw new PersonalDataDBException($"Column {columnName} does not exist");
 
-                return colDef;
+                return foundColumn;
             }
         }
         
