@@ -1,0 +1,11 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp3.0</TargetFramework>
+    <AssemblyVersion>19.12.9.11</AssemblyVersion>
+    <FileVersion>19.12.9.11</FileVersion>
+    <Nullable>enable</Nullable>
+    <WarningsAsErrors>CS8600;CS8602;CS8603;CS8618;CS8625;CS8613</WarningsAsErrors>
+  </PropertyGroup>
+
+</Project>
