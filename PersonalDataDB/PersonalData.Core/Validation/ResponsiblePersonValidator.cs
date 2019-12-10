@@ -11,13 +11,13 @@
         public void Validate(IResponsiblePerson responsiblePerson)
         {
             if (String.IsNullOrEmpty(responsiblePerson.FullName))
-                throw new PersonalDataDBException($"{personType} full name must not be null or empty");
+                throw new ValidationException($"{personType} full name must not be null or empty");
 
             if (String.IsNullOrEmpty(responsiblePerson.Phone))
-                throw new PersonalDataDBException($"{personType} phone must not be null or empty");
+                throw new ValidationException($"{personType} phone must not be null or empty");
 
             if (String.IsNullOrEmpty(responsiblePerson.Email))
-                throw new PersonalDataDBException($"{personType} email must not be null or empty");            
+                throw new ValidationException($"{personType} email must not be null or empty");            
         }
     }
 }

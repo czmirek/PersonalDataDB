@@ -1,0 +1,48 @@
+﻿namespace PersonalData.Core
+{
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+
+    internal class SchemaValidator
+    {
+        public void Validate(ISchema schema)
+        {
+            if (!schema.Tables.Any())
+                throw new ValidationException("At least one table must be defined in the schema");
+
+            IEnumerable<string> nonUniqueTables = schema.Tables.GroupBy(t => t.ID)
+                                                               .Where(t => t.Count() > 1)
+                                                               .Select(t => t.Key);
+
+            if (nonUniqueTables.Any())
+            {
+                string tableNames = String.Join(", ", nonUniqueTables);
+                throw new ValidationException($"Tables {tableNames} are not unique");
+            }
+
+
+            foreach (ITableDefinition table in schema.Tables)
+            {
+                if(!table.Columns.Any())
+                    throw new ValidationException($"Table {table.ID} does not define any columns");
+
+                IEnumerable<string> nonUniqueColumns = table.Columns.GroupBy(c => c.ID)
+                                                                    .Where(c => c.Count() > 1)
+                                                                    .Select(c => c.Key);
+
+                if(nonUniqueColumns.Any())
+                {
+                    string columnNames = String.Join(", ", nonUniqueColumns);
+                    throw new ValidationException($"Columns {columnNames} in table {table.ID} are not unique");
+                }
+
+                if (table.Columns.Any(c => c.ID.Equals(Constants.OwnerIDColumnIdentifier, StringComparison.InvariantCultureIgnoreCase)))
+                    throw new ValidationException($"Table {table.ID} must not define reserved column identifier {Constants.OwnerIDColumnIdentifier}");
+
+                if (table.Columns.Any(c => c.ID.Equals(Constants.TableIDColumnIdentifier, StringComparison.InvariantCultureIgnoreCase)))
+                    throw new ValidationException($"Table {table.ID} must not define reserved column identifier {Constants.TableIDColumnIdentifier}");
+            }
+        }
+    }
+}

@@ -32,8 +32,11 @@
             initializationValidator.Validate(initDataProvider);
 
             dataProvider.Initialize();
+            dataProvider.InitializeSchema(initDataProvider.Schema!);
             dataProvider.InsertManager(initDataProvider.DataManager!);
             dataProvider.InsertAdministrator(initDataProvider.Administrator!);
+            dataProvider.SetConfiguration(nameof(IConfiguration.AllowPurposeChoiceOnAgreementCreation), 
+                                          initDataProvider.Configuration!.AllowPurposeChoiceOnAgreementCreation);
         }
     }    
 }
