@@ -4,9 +4,13 @@
     <TargetFramework>netcoreapp3.0</TargetFramework>
     <Nullable>enable</Nullable>
     <WarningsAsErrors>CS8600;CS8602;CS8603;CS8618;CS8625</WarningsAsErrors>
-    <AssemblyVersion>19.12.11.25</AssemblyVersion>
-    <FileVersion>19.12.11.25</FileVersion>
+    <AssemblyVersion>19.12.11.34</AssemblyVersion>
+    <FileVersion>19.12.11.34</FileVersion>
   </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="AutoMapper" Version="9.0.0" />
+  </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\PersonalData.Core\PersonalData.Core.csproj" />

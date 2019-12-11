@@ -1,9 +1,9 @@
-﻿using System;
-
-namespace PersonalData.Core
+﻿namespace PersonalData.Core
 {
+    using System;
     public interface IDataManager
     {
+        object? ID { get; }
         string Name { get; }
         string Address { get; }
         string Email { get; }

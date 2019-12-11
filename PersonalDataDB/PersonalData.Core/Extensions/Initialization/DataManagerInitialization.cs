@@ -1,11 +1,9 @@
-﻿namespace PersonalData.Test
+﻿namespace PersonalData.Core.Extensions
 {
-    using PersonalData.Core;
     using System;
-
-    public class DataManagerMock : IDataManager
+    public class DataManagerInitialization : IDataManager
     {
-        public object? ID { get; set; }
+        object? IDataManager.ID => null;
         public string Name { get; set; } = String.Empty;
         public string Address { get; set; } = String.Empty;
         public string Email { get; set; } = String.Empty;

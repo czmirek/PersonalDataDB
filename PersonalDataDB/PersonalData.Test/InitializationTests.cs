@@ -85,7 +85,7 @@
         public void Invalid_Admin_Throws_Exception()
         {
             var builder = DataBuilderFake.GetFake();
-            ((ResponsiblePersonMock)builder.Administrator!).FullName = "";
+            ((AdministratorMock)builder.Administrator!).FullName = "";
 
             PersonalDataDB pddb = new PersonalDataDB(new InMemoryDataProvider());
             Assert.Throws<InitializationException>(() => pddb.CreateDatabase(builder));

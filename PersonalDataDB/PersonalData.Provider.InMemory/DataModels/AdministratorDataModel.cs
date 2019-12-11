@@ -1,8 +1,12 @@
-﻿namespace PersonalData.Core.Extensions
+﻿namespace PersonalData.Provider.InMemory
 {
+    using PersonalData.Core;
     using System;
-    public class AdministratorInitialization : IResponsiblePerson
+
+    internal class AdministratorDataModel : IAdministrator
     {
+        public object? ID { get; set; }
+
         public string FullName { get; set; } = String.Empty;
 
         public string Phone { get; set; } = String.Empty;

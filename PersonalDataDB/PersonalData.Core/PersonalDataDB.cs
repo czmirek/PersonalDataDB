@@ -1,4 +1,6 @@
-﻿namespace PersonalData.Core
+﻿using System.Collections.Generic;
+
+namespace PersonalData.Core
 {
     public class PersonalDataDB
     {
@@ -26,6 +28,8 @@
                 Initialize(initDataProvider);
         }
 
+        public IEnumerable<IDataManager> ListDataManagers() => dataProvider.ListDataManagers();
+
         private void Initialize(IInitializationDataProvider initDataProvider)
         {
             InitializationValidator initializationValidator = new InitializationValidator();
@@ -33,7 +37,7 @@
 
             dataProvider.Initialize();
             dataProvider.InitializeSchema(initDataProvider.Schema!);
-            dataProvider.InsertManager(initDataProvider.DataManager!);
+            dataProvider.InsertDataManager(initDataProvider.DataManager!);
             dataProvider.InsertAdministrator(initDataProvider.Administrator!);
             dataProvider.SetConfiguration(nameof(IConfiguration.AllowPurposeChoiceOnAgreementCreation), 
                                           initDataProvider.Configuration!.AllowPurposeChoiceOnAgreementCreation);

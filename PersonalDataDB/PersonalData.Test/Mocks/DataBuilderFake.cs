@@ -15,7 +15,7 @@
                 RegistrationNumber = "123456789",
                 PersonalDataRegistrationNumber = "987654321"
             },
-            Administrator = new ResponsiblePersonMock()
+            Administrator = new AdministratorMock()
             {
                 FullName = "Karel Admin",
                 Email = "karel.admin@example.com",
