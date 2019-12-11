@@ -9,7 +9,7 @@
         public void Validate(ISchema schema)
         {
             if (!schema.Tables.Any())
-                throw new InitializationException("At least one table must be defined in the schema");
+                throw new ValidationException("At least one table must be defined in the schema");
 
             IEnumerable<string> nonUniqueTables = schema.Tables.GroupBy(t => t.ID)
                                                                .Where(t => t.Count() > 1)
@@ -18,7 +18,7 @@
             if (nonUniqueTables.Any())
             {
                 string tableNames = String.Join(", ", nonUniqueTables);
-                throw new InitializationException($"Tables {tableNames} are not unique");
+                throw new ValidationException($"Tables {tableNames} are not unique");
             }
 
 
@@ -27,7 +27,7 @@
             foreach (ITableDefinition table in schema.Tables)
             {
                 if(!table.Columns.Any())
-                    throw new InitializationException($"Table {table.ID} does not define any columns");
+                    throw new ValidationException($"Table {table.ID} does not define any columns");
 
                 IEnumerable<string> nonUniqueColumns = table.Columns.GroupBy(c => c.ID)
                                                                     .Where(c => c.Count() > 1)
@@ -36,22 +36,22 @@
                 if(nonUniqueColumns.Any())
                 {
                     string columnNames = String.Join(", ", nonUniqueColumns);
-                    throw new InitializationException($"Columns {columnNames} in table {table.ID} are not unique");
+                    throw new ValidationException($"Columns {columnNames} in table {table.ID} are not unique");
                 }
 
                 if (table.Columns.Any(c => c.ID.Equals(Constants.OwnerIDColumnIdentifier, StringComparison.InvariantCultureIgnoreCase)))
-                    throw new InitializationException($"Table {table.ID} must not define reserved column identifier {Constants.OwnerIDColumnIdentifier}");
+                    throw new ValidationException($"Table {table.ID} must not define reserved column identifier {Constants.OwnerIDColumnIdentifier}");
 
                 if (table.Columns.Any(c => c.ID.Equals(Constants.TableIDColumnIdentifier, StringComparison.InvariantCultureIgnoreCase)))
-                    throw new InitializationException($"Table {table.ID} must not define reserved column identifier {Constants.TableIDColumnIdentifier}");
+                    throw new ValidationException($"Table {table.ID} must not define reserved column identifier {Constants.TableIDColumnIdentifier}");
 
                 foreach (IColumnDefinition fkColumn in table.Columns.Where(c => c.ColumnType == ColumnType.ForeignKey))
                 {
                     if(fkColumn.ForeignKeyReferenceTableID == null)
-                        throw new InitializationException($"Foreign key column {fkColumn.ID} does not contain a table reference");
+                        throw new ValidationException($"Foreign key column {fkColumn.ID} does not contain a table reference");
 
                     if (!tableIDs.Contains(fkColumn.ForeignKeyReferenceTableID))
-                        throw new InitializationException($"Foreign key column {fkColumn.ID} refers to a non-existing table {fkColumn.ForeignKeyReferenceTableID}");
+                        throw new ValidationException($"Foreign key column {fkColumn.ID} refers to a non-existing table {fkColumn.ForeignKeyReferenceTableID}");
                 }
             }
         }

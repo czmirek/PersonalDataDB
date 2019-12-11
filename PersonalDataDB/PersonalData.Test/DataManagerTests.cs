@@ -2,6 +2,7 @@
 {
     using PersonalData.Core;
     using PersonalData.Provider.InMemory;
+    using System;
     using System.Collections.Generic;
     using System.Linq;
     using Xunit;
@@ -32,8 +33,7 @@
         public void Insert_DataManager()
         {
             var pddb = PddbTestingInstance.GetPddbInstanceForTesting();
-            var administrators = pddb.ListAdministrators();
-            object adminID = administrators.Single().ID!;
+            object adminID = pddb.ListAdministrators().Single().ID!;
 
             object newDataManagerId = pddb.InsertDataManager(adminID, new DataManagerInputModel("Another company", "another address", "another.email@example.com", "123456789", "999", "666"));
 
@@ -43,6 +43,24 @@
 
             IEnumerable<IAdministratorLog> adminLog = pddb.ListAdministratorLogs();
             Assert.Single(adminLog);
+        }
+
+        [Fact]
+        public void Insert_Invalid_DataManager()
+        {
+            var pddb = PddbTestingInstance.GetPddbInstanceForTesting();
+            object adminID = pddb.ListAdministrators().Single().ID!;
+            
+            Assert.Throws<ValidationException>(() =>
+            {
+                pddb.InsertDataManager(adminID, new DataManagerInputModel("", "", "", "", null, null));
+            });
+
+            Assert.Throws<PersonalDataDBException>(() =>
+            {
+                pddb.InsertDataManager(Guid.NewGuid(), new DataManagerInputModel("a", "b", "c", "d", null, null));
+            });
+
         }
     }
 }
