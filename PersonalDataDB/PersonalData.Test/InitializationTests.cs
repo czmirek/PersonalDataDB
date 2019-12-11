@@ -10,7 +10,7 @@
         [Fact]
         public void Valid_Test()
         {
-            var builder = DataBuilderFake.GetFake();
+            var builder = PddbTestingInstance.GetFake();
             PersonalDataDB pddb = new PersonalDataDB(new InMemoryDataProvider());
             pddb.CreateDatabase(builder);
         }
@@ -19,7 +19,7 @@
         [Fact]
         public void Missing_DataManager_Throws_Exception()
         {
-            var builder = DataBuilderFake.GetFake();
+            var builder = PddbTestingInstance.GetFake();
             builder.DataManager = null;
             PersonalDataDB pddb = new PersonalDataDB(new InMemoryDataProvider());
             Assert.Throws<InitializationException>(() => pddb.CreateDatabase(builder));
@@ -29,7 +29,7 @@
         [Fact]
         public void Missing_Admin_Throws_Exception()
         {
-            var builder = DataBuilderFake.GetFake();
+            var builder = PddbTestingInstance.GetFake();
             builder.Administrator = null;
             PersonalDataDB pddb = new PersonalDataDB(new InMemoryDataProvider());
             Assert.Throws<InitializationException>(() => pddb.CreateDatabase(builder));
@@ -39,7 +39,7 @@
         [Fact]
         public void Missing_Config_Throws_Exception()
         {
-            var builder = DataBuilderFake.GetFake();
+            var builder = PddbTestingInstance.GetFake();
             builder.Configuration = null;
             PersonalDataDB pddb = new PersonalDataDB(new InMemoryDataProvider());
             Assert.Throws<InitializationException>(() => pddb.CreateDatabase(builder));
@@ -49,7 +49,7 @@
         [Fact]
         public void Missing_Schema_Throws_Exception()
         {
-            var builder = DataBuilderFake.GetFake();
+            var builder = PddbTestingInstance.GetFake();
             builder.Schema = null;
             PersonalDataDB pddb = new PersonalDataDB(new InMemoryDataProvider());
             Assert.Throws<InitializationException>(() => pddb.CreateDatabase(builder));
@@ -59,7 +59,7 @@
         [Fact]
         public void Invalid_DataManager()
         {
-            var builder = DataBuilderFake.GetFake();
+            var builder = PddbTestingInstance.GetFake();
             ((DataManagerMock)builder.DataManager!).Name = "";
             PersonalDataDB pddb = new PersonalDataDB(new InMemoryDataProvider());
 
@@ -73,7 +73,7 @@
         [Fact]
         public void Invalid_DataManager_Throws_Exception()
         {
-            var builder = DataBuilderFake.GetFake();
+            var builder = PddbTestingInstance.GetFake();
             ((DataManagerMock)builder.DataManager!).Name = "";
 
             PersonalDataDB pddb = new PersonalDataDB(new InMemoryDataProvider());
@@ -84,7 +84,7 @@
         [Fact]
         public void Invalid_Admin_Throws_Exception()
         {
-            var builder = DataBuilderFake.GetFake();
+            var builder = PddbTestingInstance.GetFake();
             ((AdministratorMock)builder.Administrator!).FullName = "";
 
             PersonalDataDB pddb = new PersonalDataDB(new InMemoryDataProvider());
@@ -95,7 +95,7 @@
         [Fact]
         public void Invalid_Schema_No_Tables_Throws_Exception()
         {
-            var builder = DataBuilderFake.GetFake();
+            var builder = PddbTestingInstance.GetFake();
             ((SchemaMock)builder.Schema!).TableMocks = new List<TableDefinitionMock>();
 
             PersonalDataDB pddb = new PersonalDataDB(new InMemoryDataProvider());
@@ -105,7 +105,7 @@
         [Fact]
         public void Invalid_Schema_Duplicate_Tables_Throws_Exception()
         {
-            var builder = DataBuilderFake.GetFake();
+            var builder = PddbTestingInstance.GetFake();
             SchemaMock sm = ((SchemaMock)builder.Schema!);
             sm.TableMocks[1].ID = sm.TableMocks[0].ID;
 
@@ -116,7 +116,7 @@
         [Fact]
         public void Invalid_Schema_No_Column_Throws_Exception()
         {
-            var builder = DataBuilderFake.GetFake();
+            var builder = PddbTestingInstance.GetFake();
             SchemaMock sm = ((SchemaMock)builder.Schema!);
             sm.TableMocks[1].ColumnMocks.Clear();
 
@@ -127,7 +127,7 @@
         [Fact]
         public void Invalid_Schema_Duplicate_Columns_Throws_Exception()
         {
-            var builder = DataBuilderFake.GetFake();
+            var builder = PddbTestingInstance.GetFake();
             SchemaMock sm = ((SchemaMock)builder.Schema!);
             sm.TableMocks[1].ColumnMocks[0].ID = sm.TableMocks[1].ColumnMocks[1].ID;
 

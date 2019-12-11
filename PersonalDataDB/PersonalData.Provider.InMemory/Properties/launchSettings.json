@@ -1,0 +1,7 @@
+{
+  "profiles": {
+    "PersonalData.Provider.InMemory": {
+      "commandName": "Project"
+    }
+  }
+}

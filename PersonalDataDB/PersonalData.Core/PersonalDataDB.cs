@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace PersonalData.Core
 {
@@ -29,6 +30,27 @@ namespace PersonalData.Core
         }
 
         public IEnumerable<IDataManager> ListDataManagers() => dataProvider.ListDataManagers();
+
+        public object InsertDataManager(object administratorId, DataManagerInputModel newDataManager)
+        {
+            DataManagerValidator validator = new DataManagerValidator();
+            validator.Validate(newDataManager);
+
+            bool adminExists = dataProvider.CheckAdministratorId(administratorId);
+            if (!adminExists)
+                throw new PersonalDataDBException($"Administrator ID \"{administratorId.ToString()}\" does not exist");
+
+            object newId = dataProvider.InsertDataManager(newDataManager);
+            WriteAdminLog(administratorId, $"New data manager ID \"{newId.ToString()}\" was inserted by administrator ID \"{administratorId.ToString()}\".");
+            return newId;
+        }
+
+        public IEnumerable<IAdministrator> ListAdministrators() => dataProvider.ListAdministrators();
+        public IEnumerable<IAdministratorLog> ListAdministratorLogs() => dataProvider.ListAdministratorLogs();
+        private void WriteAdminLog(object administratorId, string text)
+        {
+            dataProvider.InsertAdministratorLog(new AdministratorLogInternalModel(DateTime.Now, administratorId, text));
+        }
 
         private void Initialize(IInitializationDataProvider initDataProvider)
         {

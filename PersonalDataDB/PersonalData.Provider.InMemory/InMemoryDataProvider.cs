@@ -14,6 +14,7 @@
             {
                 cfg.CreateMap<IDataManager, DataManagerDataModel>();
                 cfg.CreateMap<IAdministrator, AdministratorDataModel>();
+                cfg.CreateMap<IAdministratorLog, AdministratorLogDataModel>();
             });
             mapper = mapperConfiguration.CreateMapper();
         }
@@ -21,9 +22,10 @@
         private static readonly IMapper mapper;
         private bool initialized = false;
         private Dictionary<Guid, IDataManager> dataManagers = new Dictionary<Guid, IDataManager>();
-        private Dictionary<Guid, IResponsiblePerson> administrators = new Dictionary<Guid, IResponsiblePerson>();
+        private Dictionary<Guid, IAdministrator> administrators = new Dictionary<Guid, IAdministrator>();
         private Dictionary<string, object?> configuration = new Dictionary<string, object?>();
         private Dictionary<string, ITableDefinition> tables = new Dictionary<string, ITableDefinition>();
+        private Dictionary<Guid, IAdministratorLog> administratorLog = new Dictionary<Guid, IAdministratorLog>();
         public void Initialize()
         {
             initialized = true;
@@ -54,8 +56,25 @@
             var dataModel = mapper.Map<AdministratorDataModel>(administrator);
             dataModel.ID = newId;
 
-            administrators.Add(newId, administrator);
+            administrators.Add(newId, dataModel);
             return newId;
+        }
+        public IEnumerable<IAdministratorLog> ListAdministratorLogs() => administratorLog.Values;
+        public void InsertAdministratorLog(IAdministratorLog newLog)
+        {
+            var newId = Guid.NewGuid();
+
+            var dataModel = mapper.Map<AdministratorLogDataModel>(newLog);
+            dataModel.ID = newId;
+
+            administratorLog.Add(newId, dataModel);
+        }
+        public bool CheckAdministratorId(object administratorId)
+        {
+            if(administratorId is Guid adminGuid)
+                return administrators.ContainsKey(adminGuid);
+
+            return false;
         }
 
         public void SetConfiguration<T>(string key, T value) where T : struct
@@ -72,5 +91,7 @@
         {
             tables = schema.Tables.ToDictionary(t => t.ID);
         }
+
+        public IEnumerable<IAdministrator> ListAdministrators() => administrators.Values;
     }
 }

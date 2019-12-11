@@ -1,9 +1,17 @@
 ﻿namespace PersonalData.Test
 {
     using PersonalData.Core;
+    using PersonalData.Provider.InMemory;
     using System.Collections.Generic;
-    public class DataBuilderFake
+    public class PddbTestingInstance
     {
+        public static PersonalDataDB GetPddbInstanceForTesting()
+        {
+            var builder = PddbTestingInstance.GetFake();
+            PersonalDataDB pddb = new PersonalDataDB(new InMemoryDataProvider());
+            pddb.CreateDatabase(builder);
+            return pddb;
+        }
         public static DefaultInitializationDataProvider GetFake() => new DefaultInitializationDataProvider
         {
             DataManager = new DataManagerMock()
