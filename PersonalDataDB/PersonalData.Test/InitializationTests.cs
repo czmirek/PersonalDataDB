@@ -22,7 +22,7 @@
             var builder = DataBuilderFake.GetFake();
             builder.DataManager = null;
             PersonalDataDB pddb = new PersonalDataDB(new InMemoryDataProvider());
-            Assert.Throws<PersonalDataDBException>(() => pddb.CreateDatabase(builder));
+            Assert.Throws<InitializationException>(() => pddb.CreateDatabase(builder));
 
         }
 
@@ -32,7 +32,7 @@
             var builder = DataBuilderFake.GetFake();
             builder.Administrator = null;
             PersonalDataDB pddb = new PersonalDataDB(new InMemoryDataProvider());
-            Assert.Throws<PersonalDataDBException>(() => pddb.CreateDatabase(builder));
+            Assert.Throws<InitializationException>(() => pddb.CreateDatabase(builder));
 
         }
 
@@ -42,7 +42,7 @@
             var builder = DataBuilderFake.GetFake();
             builder.Configuration = null;
             PersonalDataDB pddb = new PersonalDataDB(new InMemoryDataProvider());
-            Assert.Throws<PersonalDataDBException>(() => pddb.CreateDatabase(builder));
+            Assert.Throws<InitializationException>(() => pddb.CreateDatabase(builder));
 
         }
 
@@ -52,7 +52,7 @@
             var builder = DataBuilderFake.GetFake();
             builder.Schema = null;
             PersonalDataDB pddb = new PersonalDataDB(new InMemoryDataProvider());
-            Assert.Throws<PersonalDataDBException>(() => pddb.CreateDatabase(builder));
+            Assert.Throws<InitializationException>(() => pddb.CreateDatabase(builder));
 
         }
 
@@ -63,7 +63,7 @@
             ((DataManagerMock)builder.DataManager!).Name = "";
             PersonalDataDB pddb = new PersonalDataDB(new InMemoryDataProvider());
 
-            Assert.Throws<PersonalDataDBException>(() =>
+            Assert.Throws<InitializationException>(() =>
             {
                 pddb.CreateDatabase(builder);
             });
@@ -77,7 +77,7 @@
             ((DataManagerMock)builder.DataManager!).Name = "";
 
             PersonalDataDB pddb = new PersonalDataDB(new InMemoryDataProvider());
-            Assert.Throws<PersonalDataDBException>(() => pddb.CreateDatabase(builder));
+            Assert.Throws<InitializationException>(() => pddb.CreateDatabase(builder));
 
         }
 
@@ -88,7 +88,7 @@
             ((ResponsiblePersonMock)builder.Administrator!).FullName = "";
 
             PersonalDataDB pddb = new PersonalDataDB(new InMemoryDataProvider());
-            Assert.Throws<PersonalDataDBException>(() => pddb.CreateDatabase(builder));
+            Assert.Throws<InitializationException>(() => pddb.CreateDatabase(builder));
 
         }
 
@@ -99,7 +99,7 @@
             ((SchemaMock)builder.Schema!).TableMocks = new List<TableDefinitionMock>();
 
             PersonalDataDB pddb = new PersonalDataDB(new InMemoryDataProvider());
-            Assert.Throws<PersonalDataDBException>(() => pddb.CreateDatabase(builder));
+            Assert.Throws<InitializationException>(() => pddb.CreateDatabase(builder));
         }
 
         [Fact]
@@ -110,7 +110,7 @@
             sm.TableMocks[1].ID = sm.TableMocks[0].ID;
 
             PersonalDataDB pddb = new PersonalDataDB(new InMemoryDataProvider());
-            Assert.Throws<PersonalDataDBException>(() => pddb.CreateDatabase(builder));
+            Assert.Throws<InitializationException>(() => pddb.CreateDatabase(builder));
         }
 
         [Fact]
@@ -121,7 +121,7 @@
             sm.TableMocks[1].ColumnMocks.Clear();
 
             PersonalDataDB pddb = new PersonalDataDB(new InMemoryDataProvider());
-            Assert.Throws<PersonalDataDBException>(() => pddb.CreateDatabase(builder));
+            Assert.Throws<InitializationException>(() => pddb.CreateDatabase(builder));
         }
 
         [Fact]
@@ -132,7 +132,7 @@
             sm.TableMocks[1].ColumnMocks[0].ID = sm.TableMocks[1].ColumnMocks[1].ID;
 
             PersonalDataDB pddb = new PersonalDataDB(new InMemoryDataProvider());
-            Assert.Throws<PersonalDataDBException>(() => pddb.CreateDatabase(builder));
+            Assert.Throws<InitializationException>(() => pddb.CreateDatabase(builder));
         }
     }
 }

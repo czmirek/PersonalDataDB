@@ -6,16 +6,16 @@
         public void Validate(IDataManager dataManager)
         {
             if (String.IsNullOrEmpty(dataManager.Name))
-                throw new ValidationException("Data manager name must not be null or empty");
+                throw new InitializationException("Data manager name must not be null or empty");
 
             if (String.IsNullOrEmpty(dataManager.Address))
-                throw new ValidationException("Data manager address must not be null or empty");
+                throw new InitializationException("Data manager address must not be null or empty");
 
             if (String.IsNullOrEmpty(dataManager.Email))
-                throw new ValidationException("Data manager email must not be null or empty");
+                throw new InitializationException("Data manager email must not be null or empty");
 
             if (String.IsNullOrEmpty(dataManager.Phone))
-                throw new ValidationException("Data manager phone must not be null or empty");
+                throw new InitializationException("Data manager phone must not be null or empty");
         }
     }
 }

@@ -4,7 +4,7 @@
     using System.Collections.Generic;
     public class DataBuilderFake
     {
-        public static InitializationDataBuilder GetFake() => new InitializationDataBuilder
+        public static DefaultInitializationDataProvider GetFake() => new DefaultInitializationDataProvider
         {
             DataManager = new DataManagerMock()
             {

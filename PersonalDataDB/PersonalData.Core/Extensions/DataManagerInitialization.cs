@@ -1,11 +1,8 @@
-﻿namespace PersonalData.Core
+﻿namespace PersonalData.Core.Extensions
 {
     using System;
     public class DataManagerInitialization : IDataManager
     {
-        internal DataManagerInitialization()
-        { }
-
         public string Name { get; set; } = String.Empty;
 
         public string Address { get; set; } = String.Empty;

@@ -1,6 +1,6 @@
 ﻿namespace PersonalData.Core
 {
-    public class InitializationDataBuilder : IInitializationDataProvider
+    public class DefaultInitializationDataProvider : IInitializationDataProvider
     {
         public IDataManager? DataManager { get; set; }
         public IResponsiblePerson? Administrator { get; set; }
