@@ -9,14 +9,14 @@
                 if (initDataProvider.DataManager == null)
                     throw new InitializationException($"Data manager must be set");
 
-                DataManagerValidator dataManagerValidator = new DataManagerValidator();
+                DataManagerValidator dataManagerValidator = new DataManagerValidator(DataManagerValidator.ValidationMode.Insert);
                 dataManagerValidator.Validate(initDataProvider.DataManager);
 
 
                 if (initDataProvider.Administrator == null)
                     throw new InitializationException($"Administrator must be set");
 
-                ResponsiblePersonValidator adminValidator = new ResponsiblePersonValidator("Administrator");
+                ResponsiblePersonValidator adminValidator = new ResponsiblePersonValidator("Administrator", ResponsiblePersonValidator.ValidationMode.Insert);
                 adminValidator.Validate(initDataProvider.Administrator);
 
                 if (initDataProvider.Configuration == null)

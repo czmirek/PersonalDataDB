@@ -35,7 +35,7 @@
             var pddb = PddbTestingInstance.GetPddbInstanceForTesting();
             object adminID = pddb.ListAdministrators().Single().ID!;
 
-            object newDataManagerId = pddb.InsertDataManager(adminID, new DataManagerInputModel("Another company", "another address", "another.email@example.com", "123456789", "999", "666"));
+            object newDataManagerId = pddb.InsertDataManager(adminID, new DataManagerInsertModel("Another company", "another address", "another.email@example.com", "123456789", "999", "666"));
 
             IEnumerable<IDataManager> dataManagers = pddb.ListDataManagers();
             Assert.Equal(2, dataManagers.Count());
@@ -53,12 +53,12 @@
             
             Assert.Throws<ValidationException>(() =>
             {
-                pddb.InsertDataManager(adminID, new DataManagerInputModel("", "", "", "", null, null));
+                pddb.InsertDataManager(adminID, new DataManagerInsertModel("", "", "", "", null, null));
             });
 
             Assert.Throws<PersonalDataDBException>(() =>
             {
-                pddb.InsertDataManager(Guid.NewGuid(), new DataManagerInputModel("a", "b", "c", "d", null, null));
+                pddb.InsertDataManager(Guid.NewGuid(), new DataManagerInsertModel("a", "b", "c", "d", null, null));
             });
 
         }

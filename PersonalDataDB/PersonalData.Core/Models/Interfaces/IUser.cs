@@ -1,6 +1,6 @@
 ﻿namespace PersonalData.Core
 {
-    public interface IAdministrator : IResponsiblePerson
+    public interface IUser : IResponsiblePerson
     {
         object ID { get; }
     }

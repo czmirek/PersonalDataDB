@@ -3,7 +3,7 @@
     using PersonalData.Core;
     using System;
 
-    internal class AdministratorDataModel : IAdministrator
+    internal class UserDataModel : IUser
     {
         public object ID { get; set; } = new object();
 

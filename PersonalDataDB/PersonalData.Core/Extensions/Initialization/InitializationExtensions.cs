@@ -5,7 +5,7 @@
     {
         public static DefaultInitializationDataProvider UseDataManager(this DefaultInitializationDataProvider provider, DataManagerInitialization dataManager)
         {
-            DataManagerValidator validator = new DataManagerValidator();
+            DataManagerValidator validator = new DataManagerValidator(DataManagerValidator.ValidationMode.Insert);
             validator.Validate(dataManager);
 
             provider.DataManager = dataManager;
@@ -14,7 +14,7 @@
 
         public static DefaultInitializationDataProvider UseAdministrator(this DefaultInitializationDataProvider provider, AdministratorInitialization administrator)
         {
-            ResponsiblePersonValidator validator = new ResponsiblePersonValidator("Administrator");
+            ResponsiblePersonValidator validator = new ResponsiblePersonValidator("Administrator", ResponsiblePersonValidator.ValidationMode.Insert);
             validator.Validate(administrator);
 
             provider.Administrator = administrator;

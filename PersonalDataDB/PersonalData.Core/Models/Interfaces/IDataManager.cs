@@ -3,7 +3,7 @@
     using System;
     public interface IDataManager
     {
-        object? ID { get; }
+        object ID { get; }
         string Name { get; }
         string Address { get; }
         string Email { get; }

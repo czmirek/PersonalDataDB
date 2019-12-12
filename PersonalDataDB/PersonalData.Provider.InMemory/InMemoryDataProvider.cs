@@ -12,6 +12,7 @@
         {
             MapperConfiguration mapperConfiguration = new MapperConfiguration((cfg) =>
             {
+                cfg.CreateMap<IUser, UserDataModel>();
                 cfg.CreateMap<IDataManager, DataManagerDataModel>();
                 cfg.CreateMap<IAdministrator, AdministratorDataModel>();
                 cfg.CreateMap<IAdministratorLog, AdministratorLogDataModel>();
@@ -26,6 +27,7 @@
         private Dictionary<string, object?> configuration = new Dictionary<string, object?>();
         private Dictionary<string, ITableDefinition> tables = new Dictionary<string, ITableDefinition>();
         private Dictionary<Guid, IAdministratorLog> administratorLog = new Dictionary<Guid, IAdministratorLog>();
+        private Dictionary<Guid, IUser> users = new Dictionary<Guid, IUser>();
         public void Initialize()
         {
             initialized = true;
@@ -93,5 +95,58 @@
         }
 
         public IEnumerable<IAdministrator> ListAdministrators() => administrators.Values;
+
+        public bool CheckDataManagerId(object dataManagerId)
+        {
+            if (dataManagerId is Guid dataManagerGuid)
+                return dataManagers.ContainsKey(dataManagerGuid);
+
+            return false;
+        }
+
+        public void UpdateAdministrator(IAdministrator updatedAdministrator)
+        {
+            Guid id = (Guid)updatedAdministrator.ID;
+            var model = mapper.Map<AdministratorDataModel>(administrators[id]);
+            model.InternalPhoneNumber = updatedAdministrator.InternalPhoneNumber;
+            model.OfficeNumber = updatedAdministrator.OfficeNumber;
+            model.Phone = updatedAdministrator.Phone;
+            model.Email = updatedAdministrator.Email;
+            model.Supervisor = updatedAdministrator.Supervisor;
+            administrators[id] = model;
+        }
+
+        public IEnumerable<IUser> ListUsers() => users.Values;
+
+        public object InsertUser(IUser newUser)
+        {
+            var newId = Guid.NewGuid();
+
+            var dataModel = mapper.Map<UserDataModel>(newUser);
+            dataModel.ID = newId;
+
+            users.Add(newId, dataModel);
+            return newId;
+        }
+
+        public void UpdateUser(IUser updatedUser)
+        {
+            Guid id = (Guid)updatedUser.ID;
+            var model = mapper.Map<UserDataModel>(users[id]);
+            model.InternalPhoneNumber = updatedUser.InternalPhoneNumber;
+            model.OfficeNumber = updatedUser.OfficeNumber;
+            model.Phone = updatedUser.Phone;
+            model.Email = updatedUser.Email;
+            model.Supervisor = updatedUser.Supervisor;
+            users[id] = model;
+        }
+
+        public bool CheckUserId(object userId)
+        {
+            if (userId is Guid userGuid)
+                return users.ContainsKey(userGuid);
+
+            return false;
+        }
     }
 }

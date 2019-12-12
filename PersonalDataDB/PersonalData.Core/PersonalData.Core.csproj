@@ -2,8 +2,8 @@
 
   <PropertyGroup>
     <TargetFramework>netcoreapp3.0</TargetFramework>
-    <AssemblyVersion>19.12.11.45</AssemblyVersion>
-    <FileVersion>19.12.11.45</FileVersion>
+    <AssemblyVersion>19.12.12.51</AssemblyVersion>
+    <FileVersion>19.12.12.51</FileVersion>
     <Nullable>enable</Nullable>
     <WarningsAsErrors>CS8600;CS8602;CS8603;CS8618;CS8625;CS8613</WarningsAsErrors>
   </PropertyGroup>
