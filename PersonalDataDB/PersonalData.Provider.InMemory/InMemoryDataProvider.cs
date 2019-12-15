@@ -24,7 +24,7 @@
         private bool initialized = false;
         private Dictionary<Guid, IDataManager> dataManagers = new Dictionary<Guid, IDataManager>();
         private Dictionary<Guid, IAdministrator> administrators = new Dictionary<Guid, IAdministrator>();
-        private Dictionary<string, object?> configuration = new Dictionary<string, object?>();
+        private readonly Dictionary<string, object?> configuration = new Dictionary<string, object?>();
         private Dictionary<string, ITableDefinition> tables = new Dictionary<string, ITableDefinition>();
         private Dictionary<Guid, IAdministratorLog> administratorLog = new Dictionary<Guid, IAdministratorLog>();
         private Dictionary<Guid, IUser> users = new Dictionary<Guid, IUser>();

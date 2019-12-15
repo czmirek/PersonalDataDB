@@ -23,5 +23,7 @@ namespace PersonalData.Core
         bool CheckDataManagerId(object dataManagerId);
         bool CheckAdministratorId(object administratorId);
         bool CheckUserId(object userId);
+        object InsertOwner();
+        void InsertUserLog(UserLogInternalModel userLogInternalModel);
     }
 }

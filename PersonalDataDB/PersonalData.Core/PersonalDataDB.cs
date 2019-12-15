@@ -6,10 +6,12 @@
     {
         private readonly IDataProvider dataProvider;
         private object taskRunner;
+
+        /// <summary>
+        /// Lock used during initialization process
+        /// </summary>
         private static readonly object initializationLock = new object();
-        private static readonly object dataManagersLock = new object();
-        private static readonly object administratorsLock = new object();
-        private static readonly object usersLock = new object();
+
         public PersonalDataDB(IDataProvider dataProvider)
         {
             this.dataProvider = dataProvider;
@@ -39,13 +41,11 @@
         }
         public IEnumerable<IAdministrator> ListAdministrators()
         {
-            lock(administratorsLock)
-                return dataProvider.ListAdministrators();
+            return dataProvider.ListAdministrators();
         }
         public IEnumerable<IDataManager> ListDataManagers()
         {
-            lock (dataManagersLock)
-                return dataProvider.ListDataManagers();
+            return dataProvider.ListDataManagers();
         }
         public IEnumerable<IAdministratorLog> ListAdministratorLogs() => dataProvider.ListAdministratorLogs();
         public object InsertDataManager(object administratorId, DataManagerInsertModel newDataManager)
@@ -56,8 +56,7 @@
             CheckAdministratorId(administratorId);
 
             object newId = new object();
-            lock (dataManagersLock)
-                newId = dataProvider.InsertDataManager(newDataManager);
+            newId = dataProvider.InsertDataManager(newDataManager);
             
             WriteAdminLog(administratorId, $"New data manager ID \"{newId.ToString()}\" was inserted by administrator ID \"{administratorId.ToString()}\".");
             return newId;
@@ -70,8 +69,7 @@
             validator.Validate(newAdministrator);
             
             object newId;
-            lock (administratorsLock)
-                newId = dataProvider.InsertAdministrator(newAdministrator);
+            newId = dataProvider.InsertAdministrator(newAdministrator);
 
             WriteAdminLog(insertingAdministratorId, $"Administrator with id \"{insertingAdministratorId.ToString()}\" created a new administrator with id \"{newId.ToString()}\"");
             
@@ -92,18 +90,14 @@
 
         public IEnumerable<IUser> ListUsers()
         {
-            lock (usersLock)
-                return dataProvider.ListUsers();
+            return dataProvider.ListUsers();
         }
         public object InsertUser(object administratorId, UserInsertModel model)
         {
             CheckAdministratorId(administratorId);
 
             object newId;
-            lock (usersLock)
-            {
-                newId = dataProvider.InsertUser(model);
-            }
+            newId = dataProvider.InsertUser(model);
 
             WriteAdminLog(administratorId, $"Administrator with ID {administratorId.ToString()} created a new user with ID \"{newId.ToString()}\".");
             return newId;
@@ -114,8 +108,7 @@
             CheckAdministratorId(administratorId);
             CheckUserId(model.ID);
 
-            lock(usersLock)
-                dataProvider.UpdateUser(model);
+            dataProvider.UpdateUser(model);
 
             WriteAdminLog(administratorId, $"Administrator with ID {administratorId.ToString()} updated an existing user with ID \"{model.ID.ToString()}\".");
         }
@@ -127,16 +120,29 @@
             var validator = new ResponsiblePersonValidator("Administrator", ResponsiblePersonValidator.ValidationMode.Update);
             validator.Validate(updatedAdministrator);
 
-            lock(administratorsLock)
-                dataProvider.UpdateAdministrator(updatedAdministrator);
+            dataProvider.UpdateAdministrator(updatedAdministrator);
         }
 
-        public object InsertOwnerByAdministrator(object administratorId) {
-            throw new NotImplementedException();
+        public object InsertOwnerByAdministrator(object administratorId) 
+        {
+            CheckAdministratorId(administratorId);
+            object newId = dataProvider.InsertOwner();
+            WriteAdminLog(administratorId, $"Administrator with ID {administratorId.ToString()} created a new owner with ID {newId.ToString()}");
+            return newId;
         }
-        public object InsertOwnerByUser(object userId) {
-            throw new NotImplementedException();
+        public object InsertOwnerByUser(object userId) 
+        {
+            CheckUserId(userId);
+            object newId = dataProvider.InsertOwner();
+            WriteUserLog(userId, $"User with ID {userId.ToString()} created a new owner with ID {newId.ToString()}");
+            return newId;
         }
+
+        private void WriteUserLog(object userId, string text)
+        {
+            dataProvider.InsertUserLog(new UserLogInternalModel(DateTime.Now, userId, text));
+        }
+
         public object InsertOwnerByOwner() {
             throw new NotImplementedException();
         }
@@ -158,20 +164,14 @@
         }
         private void CheckAdministratorId(object administratorId)
         {
-            lock (administratorsLock)
-            {
-                if (!dataProvider.CheckAdministratorId(administratorId))
-                    throw new PersonalDataDBException($"Administrator ID \"{administratorId.ToString()}\" does not exist");
-            }
+            if (!dataProvider.CheckAdministratorId(administratorId))
+                throw new PersonalDataDBException($"Administrator ID \"{administratorId.ToString()}\" does not exist");
         }
 
         private void CheckUserId(object userId)
         {
-            lock (usersLock)
-            {
-                if (!dataProvider.CheckUserId(userId))
-                    throw new PersonalDataDBException($"User ID \"{userId.ToString()}\" does not exist");
-            }
+            if (!dataProvider.CheckUserId(userId))
+                throw new PersonalDataDBException($"User ID \"{userId.ToString()}\" does not exist");
         }
 
         /*
