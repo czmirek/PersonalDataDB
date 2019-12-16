@@ -24,6 +24,56 @@ namespace PersonalData.Core
         bool CheckAdministratorId(object administratorId);
         bool CheckUserId(object userId);
         object InsertOwner();
-        void InsertUserLog(UserLogInternalModel userLogInternalModel);
+        void InsertUserLog(IUserLog log);
+        void InsertOwnerLog(IOwnerLog log);
+        IEnumerable<IPurpose> ListPurposes();
+        object InsertPurpose(IPurpose model);
+        IEnumerable<IAgreementTemplate> ListAgreementTemplates();
+        IEnumerable<IAgreement> ListAgreements();
+        void UpdateDataManager(IDataManager updatedDataManager);
+        void DeleteDataManager(object removedDataManagerId);
+        bool CheckOwnerId(object ownerId);
+
+        /// <summary>
+        /// Returns true if there in any single cell with an existing personal data.
+        /// Non-existing personal data cells are excluded.
+        /// </summary>
+        /// <param name="ownerId">ID of the personal data owner</param>
+        bool PersonalDataExistsForOwner(object ownerId);
+        void DeleteOwner(object ownerId);
+
+
+        /// <summary>
+        /// Lists all owner restrictions
+        /// </summary>
+        /// <returns></returns>
+        IEnumerable<IOwnerRestriction> ListOwnerRestrictions();
+        /// <summary>
+        /// Lists owner restrictions for specific owner
+        /// </summary>
+        /// <param name="ownerId">ID of the owner</param>
+        IEnumerable<IOwnerRestriction> ListOwnerRestrictions(object ownerId);
+        void ClearAllPersonalDataForOwner(object ownerId);
+        void ClearOwnerLog(object ownerId);
+        bool CheckPurposeId(object purposeId);
+        IEnumerable<IAgreement> ListAgreementsByPurpose(object purposeId);
+        void UpdatePurpose(IPurpose model);
+        void DeletePurpose(object purposeId);
+        object InsertAgreementTemplate(IAgreementTemplate agreementTemplate);
+        void UpdateAgreementTemplate(IAgreementTemplate agreementTemplate);
+        void DeleteAgreementTemplate(object agreementTemplateId);
+        object InsertOwnerRestriction(IOwnerRestriction model);
+        bool CheckOwnerRestrictionId(object ownerRestrictionId);
+        void DeleteOwnerRestriction(object ownerRestrictionId);
+        IOwnerRestriction GetOwnerRestriction(object ownerRestrictionId);
+        IEnumerable<IOwnerRestrictionExplanation> ListOwnerRestrictionExplanations();
+        object InsertOwnerRestrictionExplanation(OwnerRestrictionExplanationInsertModel model);
+        bool CheckOwnerRestrictionExplanationId(object ownerRestrictionExplanationId);
+        IOwnerRestrictionExplanation GetOwnerRestrictionExplanation(object ownerRestrictionExplanationId);
+        void DeleteOwnerRestrictionExplanation(object ownerRestrictionExplanationId);
+        IEnumerable<ITableDefinition> ListTables();
+        bool CheckTableId(string tableId);
+        ITableDefinition GetTable(string tableID);
+        void InsertTable(ITableDefinition model);
     }
 }

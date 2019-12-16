@@ -11,7 +11,7 @@
         public void Valid_Test()
         {
             var builder = PddbTestingInstance.GetFake();
-            PersonalDataDB pddb = new PersonalDataDB(new InMemoryDataProvider());
+            PersonalDataDB pddb = PersonalDataDB.Create(new InMemoryDataProvider());
             pddb.CreateDatabase(builder);
         }
 
@@ -21,7 +21,7 @@
         {
             var builder = PddbTestingInstance.GetFake();
             builder.DataManager = null;
-            PersonalDataDB pddb = new PersonalDataDB(new InMemoryDataProvider());
+            PersonalDataDB pddb = PersonalDataDB.Create(new InMemoryDataProvider());
             Assert.Throws<InitializationException>(() => pddb.CreateDatabase(builder));
 
         }
@@ -31,7 +31,7 @@
         {
             var builder = PddbTestingInstance.GetFake();
             builder.Administrator = null;
-            PersonalDataDB pddb = new PersonalDataDB(new InMemoryDataProvider());
+            PersonalDataDB pddb = PersonalDataDB.Create(new InMemoryDataProvider());
             Assert.Throws<InitializationException>(() => pddb.CreateDatabase(builder));
 
         }
@@ -41,7 +41,7 @@
         {
             var builder = PddbTestingInstance.GetFake();
             builder.Configuration = null;
-            PersonalDataDB pddb = new PersonalDataDB(new InMemoryDataProvider());
+            PersonalDataDB pddb = PersonalDataDB.Create(new InMemoryDataProvider());
             Assert.Throws<InitializationException>(() => pddb.CreateDatabase(builder));
 
         }
@@ -51,7 +51,7 @@
         {
             var builder = PddbTestingInstance.GetFake();
             builder.Schema = null;
-            PersonalDataDB pddb = new PersonalDataDB(new InMemoryDataProvider());
+            PersonalDataDB pddb = PersonalDataDB.Create(new InMemoryDataProvider());
             Assert.Throws<InitializationException>(() => pddb.CreateDatabase(builder));
 
         }
@@ -61,7 +61,7 @@
         {
             var builder = PddbTestingInstance.GetFake();
             ((DataManagerMock)builder.DataManager!).Name = "";
-            PersonalDataDB pddb = new PersonalDataDB(new InMemoryDataProvider());
+            PersonalDataDB pddb = PersonalDataDB.Create(new InMemoryDataProvider());
 
             Assert.Throws<InitializationException>(() =>
             {
@@ -76,7 +76,7 @@
             var builder = PddbTestingInstance.GetFake();
             ((DataManagerMock)builder.DataManager!).Name = "";
 
-            PersonalDataDB pddb = new PersonalDataDB(new InMemoryDataProvider());
+            PersonalDataDB pddb = PersonalDataDB.Create(new InMemoryDataProvider());
             Assert.Throws<InitializationException>(() => pddb.CreateDatabase(builder));
 
         }
@@ -87,7 +87,7 @@
             var builder = PddbTestingInstance.GetFake();
             ((AdministratorMock)builder.Administrator!).FullName = "";
 
-            PersonalDataDB pddb = new PersonalDataDB(new InMemoryDataProvider());
+            PersonalDataDB pddb = PersonalDataDB.Create(new InMemoryDataProvider());
             Assert.Throws<InitializationException>(() => pddb.CreateDatabase(builder));
 
         }
@@ -98,7 +98,7 @@
             var builder = PddbTestingInstance.GetFake();
             ((SchemaMock)builder.Schema!).TableMocks = new List<TableDefinitionMock>();
 
-            PersonalDataDB pddb = new PersonalDataDB(new InMemoryDataProvider());
+            PersonalDataDB pddb = PersonalDataDB.Create(new InMemoryDataProvider());
             Assert.Throws<InitializationException>(() => pddb.CreateDatabase(builder));
         }
 
@@ -109,7 +109,7 @@
             SchemaMock sm = ((SchemaMock)builder.Schema!);
             sm.TableMocks[1].ID = sm.TableMocks[0].ID;
 
-            PersonalDataDB pddb = new PersonalDataDB(new InMemoryDataProvider());
+            PersonalDataDB pddb = PersonalDataDB.Create(new InMemoryDataProvider());
             Assert.Throws<InitializationException>(() => pddb.CreateDatabase(builder));
         }
 
@@ -120,7 +120,7 @@
             SchemaMock sm = ((SchemaMock)builder.Schema!);
             sm.TableMocks[1].ColumnMocks.Clear();
 
-            PersonalDataDB pddb = new PersonalDataDB(new InMemoryDataProvider());
+            PersonalDataDB pddb = PersonalDataDB.Create(new InMemoryDataProvider());
             Assert.Throws<InitializationException>(() => pddb.CreateDatabase(builder));
         }
 
@@ -131,7 +131,7 @@
             SchemaMock sm = ((SchemaMock)builder.Schema!);
             sm.TableMocks[1].ColumnMocks[0].ID = sm.TableMocks[1].ColumnMocks[1].ID;
 
-            PersonalDataDB pddb = new PersonalDataDB(new InMemoryDataProvider());
+            PersonalDataDB pddb = PersonalDataDB.Create(new InMemoryDataProvider());
             Assert.Throws<InitializationException>(() => pddb.CreateDatabase(builder));
         }
     }
