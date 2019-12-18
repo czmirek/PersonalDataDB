@@ -30,6 +30,7 @@ namespace PersonalData.Core
         object InsertPurpose(IPurpose model);
         IEnumerable<IAgreementTemplate> ListAgreementTemplates();
         IEnumerable<IAgreement> ListAgreements();
+        IEnumerable<IAgreement> ListAgreementsForOwner(object ownerId);
         void UpdateDataManager(IDataManager updatedDataManager);
         void DeleteDataManager(object removedDataManagerId);
         bool CheckOwnerId(object ownerId);
@@ -75,5 +76,22 @@ namespace PersonalData.Core
         bool CheckTableId(string tableId);
         ITableDefinition GetTable(string tableID);
         void InsertTable(ITableDefinition model);
+        void UpdateTable(ITableDefinition model);
+        bool CheckTableContainsExistingPersonalData(string tableID);
+        void DeleteTable(string tableID);
+        IEnumerable<IColumnDefinition> ListColumns(string tableId);
+        void InsertColumn(string tableId, IColumnDefinition model);
+        bool CheckColumnId(string tableId, string columnId);
+        void UpdateColumn(string tableId, IColumnDefinition model);
+        bool CheckColumnContainsExistingPersonalData(string tableId, string columnId);
+        void DeleteColumn(string tableId, string columnId);
+        bool CheckRowId(string tableId, object rowId);
+        object GetOwnerForRowId(string tableId, object rowId);
+        IPersonalDataCell ReadPersonalDataCell(string tableId, string columnId, object rowId);
+        IColumnDefinition GetColumn(string tableId, string columnId);
+        IEnumerable<IPersonalDataCell> ReadPersonalDataCells(string tableId, object rowId, IEnumerable<string> columnIDs);
+        IPersonalDataRow ReadPersonalDataRow(string tableId, object rowId);
+        IEnumerable<object> GetRowIdsForOwnerId(string tableId, object ownerId);
+        IEnumerable<IPersonalDataRow> ReadPersonalDataCellByOwner(string tableId, object ownerId);
     }
 }

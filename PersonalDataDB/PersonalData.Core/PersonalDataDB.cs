@@ -10,26 +10,11 @@
     {
         private readonly IDataProvider dataProvider;
         
-        private static readonly object dataManagerLock = new object();
-        private static readonly object agreementTemplateLock = new object();
-        private static readonly object agreementLock = new object();
-
-        /// <summary>
-        /// Lock used during initialization process
-        /// </summary>
-        private static readonly object initializationLock = new object();
-        private static readonly object administratorLock = new object();
-        private static readonly object purposeLock = new object();
-        private static readonly object userLock = new object();
-        private static readonly object ownerLock = new object();
-        private static readonly object ownerRestrictionLock = new object();
-        private static readonly object ownerRestrictionExplanationLock = new object();
-        private static readonly object schemaLock = new object();
+        private static readonly object dataAccessLock = new object();
 
         /// <summary>
         /// Lock for locking access to personal data of a specific owner.
         /// </summary>
-        private static readonly ConcurrentDictionary<object, object> ownerPersonalDataLocks = new ConcurrentDictionary<object, object>();
 
         private static PersonalDataDB? singleton = null;
 
@@ -51,7 +36,7 @@
             if (initDataProvider is null)
                 throw new ArgumentNullException(nameof(initDataProvider));
 
-            lock (initializationLock)
+            lock (dataAccessLock)
             {
                 bool isInitialized = dataProvider.IsDatabaseInitialized();
 
@@ -66,7 +51,7 @@
             if (initDataProvider is null)
                 throw new ArgumentNullException(nameof(initDataProvider));
 
-            lock (initializationLock)
+            lock (dataAccessLock)
             {
                 bool isInitialized = dataProvider.IsDatabaseInitialized();
 
@@ -96,7 +81,7 @@
             if (model is null)
                 throw new ArgumentNullException(nameof(model));
 
-            lock (administratorLock)
+            lock (dataAccessLock)
             {
                 CheckAdministratorId(administratorId);
 
@@ -114,7 +99,7 @@
             if (model is null)
                 throw new ArgumentNullException(nameof(model));
             
-            MultiLock(new [] { administratorLock, purposeLock, agreementLock }, () =>
+            lock(dataAccessLock)
             {
                 CheckAdministratorId(administratorId);
                 CheckPurposeId(model.ID);
@@ -124,7 +109,7 @@
                     throw new PersonalDataDBException($"Unable to update purpose ID \"{model.ID}\" because there are agreements referencing it.");
 
                 dataProvider.UpdatePurpose(model);
-            });
+            }
         }
 
         public void DeletePurpose(object administratorId, object purposeId)
@@ -135,7 +120,7 @@
             if (purposeId is null)
                 throw new ArgumentNullException(nameof(purposeId));
 
-            MultiLock(new[] { administratorLock, purposeLock, agreementLock }, () =>
+            lock (dataAccessLock)
             {
                 CheckAdministratorId(administratorId);
                 CheckPurposeId(purposeId);
@@ -145,7 +130,7 @@
                     throw new PersonalDataDBException($"Unable to delete purpose ID \"{purposeId.ToString()}\" because there are agreements referencing it.");
 
                 dataProvider.DeletePurpose(purposeId);
-            });
+            }
         }
 
         
@@ -163,7 +148,7 @@
             DataManagerValidator validator = new DataManagerValidator(DataManagerValidator.ValidationMode.Insert);
             validator.Validate(newDataManager);
 
-            lock (administratorLock)
+            lock (dataAccessLock)
             {
                 CheckAdministratorId(administratorId);
                 
@@ -183,7 +168,7 @@
             if (newAdministrator is null)
                 throw new ArgumentNullException(nameof(newAdministrator));
 
-            lock (administratorLock)
+            lock (dataAccessLock)
             {
                 CheckAdministratorId(insertingAdministratorId);
 
@@ -223,7 +208,7 @@
             if (model is null)
                 throw new ArgumentNullException(nameof(model));
 
-            lock (administratorLock)
+            lock (dataAccessLock)
             {
                 CheckAdministratorId(administratorId);
 
@@ -243,7 +228,7 @@
             if (model is null)
                 throw new ArgumentNullException(nameof(model));
 
-            MultiLock(new[] { administratorLock, userLock }, () =>
+            lock (dataAccessLock)
             {
                 CheckAdministratorId(administratorId);
                 CheckUserId(model.ID);
@@ -251,7 +236,7 @@
                 dataProvider.UpdateUser(model);
 
                 WriteAdminLog(administratorId, $"User with ID \"{model.ID.ToString()}\" was updated.");
-            });
+            }
         }
 
         public void UpdateAdministrator(object updatingAdministratorId, AdministratorUpdateModel updatedAdministrator)
@@ -262,7 +247,7 @@
             if (updatedAdministrator is null)
                 throw new ArgumentNullException(nameof(updatedAdministrator));
 
-            lock (administratorLock)
+            lock (dataAccessLock)
             {
                 CheckAdministratorId(updatingAdministratorId);
 
@@ -278,7 +263,7 @@
             if (administratorId is null)
                 throw new ArgumentNullException(nameof(administratorId));
 
-            lock (administratorLock)
+            lock (dataAccessLock)
             {
                 CheckAdministratorId(administratorId);
                 object newId = dataProvider.InsertOwner();
@@ -291,7 +276,7 @@
             if (userId is null)
                 throw new ArgumentNullException(nameof(userId));
 
-            lock (userLock)
+            lock (dataAccessLock)
             {
                 CheckUserId(userId);
                 object newId = dataProvider.InsertOwner();
@@ -315,26 +300,18 @@
             if (ownerId is null)
                 throw new ArgumentNullException(nameof(ownerId));
 
-            var personalDataLock = ownerPersonalDataLocks.GetOrAdd(ownerId, new object());
-
-            MultiLock(new[] { administratorLock, ownerLock, personalDataLock }, () =>
+            lock (dataAccessLock)
             {
-                try
-                {
-                    CheckAdministratorId(administratorId);
-                    CheckOwnerId(ownerId);
 
-                    if (dataProvider.PersonalDataExistsForOwner(ownerId))
-                        throw new PersonalDataDBException("Unable to delete owner, there are still some personal data attached to it.");
+                CheckAdministratorId(administratorId);
+                CheckOwnerId(ownerId);
 
-                    dataProvider.DeleteOwner(ownerId);
-                    WriteAdminLog(administratorId, $"Owner with ID {ownerId.ToString()} has been deleted");
-                }
-                finally
-                {
-                    ownerPersonalDataLocks.TryRemove(ownerId, out _);
-                }
-            });
+                if (dataProvider.PersonalDataExistsForOwner(ownerId))
+                    throw new PersonalDataDBException("Unable to delete owner, there are still some personal data attached to it.");
+
+                dataProvider.DeleteOwner(ownerId);
+                WriteAdminLog(administratorId, $"Owner with ID {ownerId.ToString()} has been deleted");
+            }
         }
 
         public void DeleteOwnerByUser(object userId, object ownerId)
@@ -345,26 +322,17 @@
             if (ownerId is null)
                 throw new ArgumentNullException(nameof(ownerId));
 
-            var personalDataLock = ownerPersonalDataLocks.GetOrAdd(ownerId, new object());
-
-            MultiLock(new[] { userLock, ownerLock, personalDataLock }, () =>
+            lock (dataAccessLock)
             {
-                try
-                {
-                    CheckUserId(userId);
-                    CheckOwnerId(ownerId);
+                CheckUserId(userId);
+                CheckOwnerId(ownerId);
 
-                    if (dataProvider.PersonalDataExistsForOwner(ownerId))
-                        throw new PersonalDataDBException("Unable to delete owner, there are still some personal data attached to it.");
+                if (dataProvider.PersonalDataExistsForOwner(ownerId))
+                    throw new PersonalDataDBException("Unable to delete owner, there are still some personal data attached to it.");
 
-                    dataProvider.DeleteOwner(ownerId);
-                    WriteUserLog(userId, $"Owner with ID {ownerId.ToString()} has been deleted");
-                }
-                finally
-                {
-                    ownerPersonalDataLocks.TryRemove(ownerId, out _);
-                }
-            });
+                dataProvider.DeleteOwner(ownerId);
+                WriteUserLog(userId, $"Owner with ID {ownerId.ToString()} has been deleted");
+            }
         }
 
         public void DeleteOwnerByOwner(object ownerId)
@@ -372,28 +340,20 @@
             if (ownerId is null)
                 throw new ArgumentNullException(nameof(ownerId));
 
-            var personalDataLock = ownerPersonalDataLocks.GetOrAdd(ownerId, new object());
-
-            MultiLock(new[] { ownerLock, personalDataLock }, () =>
+            
+            lock (dataAccessLock)
             {
-                try
-                {
-                    CheckOwnerId(ownerId);
+                CheckOwnerId(ownerId);
 
-                    IEnumerable<IOwnerRestriction> ownerRestrictions = dataProvider.ListOwnerRestrictions(ownerId);
+                IEnumerable<IOwnerRestriction> ownerRestrictions = dataProvider.ListOwnerRestrictions(ownerId);
 
-                    if (ownerRestrictions.Any())
-                        throw new PersonalDataDBException("Unable to remove owner on his own volition because there are relevant owner restrictions attached.");
+                if (ownerRestrictions.Any())
+                    throw new PersonalDataDBException("Unable to remove owner on his own volition because there are owner restrictions attached.");
 
-                    dataProvider.ClearAllPersonalDataForOwner(ownerId);
-                    dataProvider.DeleteOwner(ownerId);
-                    WriteOwnerLog(ownerId, $"Owner was deleted on his own volition");   
-                }
-                finally
-                {
-                    ownerPersonalDataLocks.TryRemove(ownerId, out _);
-                }
-            });
+                dataProvider.ClearAllPersonalDataForOwner(ownerId);
+                dataProvider.DeleteOwner(ownerId);
+                WriteOwnerLog(ownerId, $"Owner was deleted on his own volition");   
+            }
         }
 
         public void UpdateDataManager(object administratorId, DataManagerUpdateModel updatedDataManager)
@@ -404,7 +364,7 @@
             if (updatedDataManager is null)
                 throw new ArgumentNullException(nameof(updatedDataManager));
 
-            MultiLock(new[] { administratorLock, dataManagerLock, agreementTemplateLock, agreementLock }, () =>
+            lock (dataAccessLock)
             {
                 CheckAdministratorId(administratorId);
                 CheckDataManagerId(updatedDataManager.ID);
@@ -419,7 +379,7 @@
 
                 dataProvider.UpdateDataManager(updatedDataManager);
                 WriteAdminLog(administratorId, $"Data manager with ID {updatedDataManager.ID.ToString()} was updated");
-            });
+            }
         }
 
         public void DeleteDataManager(object administratorId, object removedDataManagerId)
@@ -430,7 +390,7 @@
             if (removedDataManagerId is null)
                 throw new ArgumentNullException(nameof(removedDataManagerId));
 
-            MultiLock(new[] { administratorLock, dataManagerLock, agreementTemplateLock, agreementLock }, () =>
+            lock (dataAccessLock)
             {
                 CheckAdministratorId(administratorId);
                 CheckDataManagerId(removedDataManagerId);
@@ -445,7 +405,7 @@
 
                 dataProvider.DeleteDataManager(removedDataManagerId);
                 WriteAdminLog(administratorId, $"Data manager with ID {removedDataManagerId.ToString()} was deleted");
-            });
+            }
         }
 
         public IEnumerable<IAgreementTemplate> ListAgreementTemplates()
@@ -466,7 +426,7 @@
 
             object newId = new object();
 
-            MultiLock(new[] { administratorLock, purposeLock }, () =>
+            lock (dataAccessLock)
             {
                 foreach (object purposeId in model.PurposeIDs)
                     CheckPurposeId(purposeId);
@@ -475,7 +435,7 @@
 
                 newId = dataProvider.InsertAgreementTemplate(model);
                 WriteAdminLog(administratorId, $"New agreement template with ID {newId.ToString()} was created");
-            });
+            }
 
             return newId;
         }
@@ -491,7 +451,7 @@
             if(!model.PurposeIDs.Any())
                 throw new PersonalDataDBException("Agreement template must be connected to at least one purpose");
 
-            MultiLock(new[] { administratorLock, purposeLock, agreementLock, agreementTemplateLock }, () =>
+            lock (dataAccessLock)
             {
                 foreach (object purposeId in model.PurposeIDs)
                     CheckPurposeId(purposeId);
@@ -500,7 +460,7 @@
 
                 dataProvider.UpdateAgreementTemplate(model);
                 WriteAdminLog(administratorId, $"Agreement template with ID {model.ID.ToString()} was updated");
-            });
+            }
         }
 
         public void DeleteAgreementTemplate(object administratorId, object agreementTemplateId)
@@ -511,13 +471,13 @@
             if (agreementTemplateId is null)
                 throw new ArgumentNullException(nameof(agreementTemplateId));
 
-            MultiLock(new[] { administratorLock, purposeLock, agreementLock, agreementTemplateLock }, () =>
+            lock (dataAccessLock)
             {
                 CheckAdministratorId(administratorId);
                 CheckAgreementTemplateId(agreementTemplateId);
                 dataProvider.DeleteAgreementTemplate(agreementTemplateId);
                 WriteAdminLog(administratorId, $"Agreement template with ID {agreementTemplateId.ToString()} has been deleted");
-            });
+            }
         }
 
         public IEnumerable<IOwnerRestriction> ListOwnerRestrictions()
@@ -540,7 +500,7 @@
                 throw new ArgumentNullException(nameof(model));
 
             object newId = new object();
-            MultiLock(new[] { userLock, ownerRestrictionLock }, () =>
+            lock (dataAccessLock)
             {
                 CheckUserId(userId);
                 CheckOwnerId(model.OwnerID);
@@ -555,7 +515,7 @@
 
                 WriteUserLog(userId, $"New owner restriction ID {newId.ToString()} was created");
                 WriteOwnerLog(model.OwnerID, $"New owner restriction ID {newId.ToString()} was created");
-            });
+            }
 
             return newId;
         }
@@ -568,7 +528,7 @@
             if (ownerRestrictionId is null)
                 throw new ArgumentNullException(nameof(ownerRestrictionId));
 
-            MultiLock(new[] { userLock, ownerRestrictionLock }, () =>
+            lock (dataAccessLock)
             {
                 CheckUserId(userId);
                 CheckOwnerRestrictionId(ownerRestrictionId);
@@ -579,7 +539,7 @@
                 
                 WriteUserLog(userId, $"Owner restriction ID {ownerRestrictionId.ToString()} was deleted");
                 WriteOwnerLog(ownerRestriction.OwnerID, $"Owner restriction ID {ownerRestrictionId.ToString()} was deleted");
-            });
+            }
         }
 
         public IEnumerable<IOwnerRestrictionExplanation> ListOwnerRestrictionExplanations()
@@ -596,12 +556,12 @@
                 throw new ArgumentNullException(nameof(model));
 
             object newId = new object();
-            MultiLock(new[] { administratorLock, ownerRestrictionExplanationLock }, () =>
+            lock (dataAccessLock)
             {
                 CheckAdministratorId(administratorId);
                 newId = dataProvider.InsertOwnerRestrictionExplanation(model);
                 WriteAdminLog(administratorId, $"New owner restriction with ID {newId.ToString()} has been created");
-            });
+            }
             return newId;
         }
 
@@ -613,7 +573,7 @@
             if (ownerRestrictionExplanationId is null)
                 throw new ArgumentNullException(nameof(ownerRestrictionExplanationId));
 
-            MultiLock(new[] { administratorLock, ownerRestrictionLock, ownerRestrictionExplanationLock}, () =>
+            lock (dataAccessLock)
             {
                 CheckAdministratorId(administratorId);
                 CheckOwnerRestrictionExplanationId(ownerRestrictionExplanationId);
@@ -624,7 +584,7 @@
                 
                 dataProvider.DeleteOwnerRestrictionExplanation(ownerRestrictionExplanationId);
                 WriteAdminLog(administratorId, $"Owner restriction explanation with ID {ownerRestrictionExplanationId.ToString()} has been deleted");
-            });
+            }
         }
 
         public IEnumerable<ITableDefinition> ListTables()
@@ -637,7 +597,7 @@
             if (tableID is null)
                 throw new ArgumentNullException(nameof(tableID));
 
-            lock (schemaLock)
+            lock (dataAccessLock)
             {
                 CheckTableID(tableID);
                 return dataProvider.GetTable(tableID);
@@ -653,16 +613,348 @@
                 throw new ArgumentNullException(nameof(model));
 
 
-            MultiLock(new[] { administratorLock }, () =>
+            lock (dataAccessLock)
             {
                 CheckAdministratorId(administratorId);
                 dataProvider.InsertTable(model);
+
                 WriteAdminLog(administratorId, $"New personal data table {model.ID} was added to the schema");
-            });
+            }
+        }
+
+        public void UpdateTable(object administratorId, TableDefinitionUpdateModel model)
+        {
+            if (administratorId is null)
+                throw new ArgumentNullException(nameof(administratorId));
+
+            if (model is null)
+                throw new ArgumentNullException(nameof(model));
+
+            lock (dataAccessLock)
+            {
+                CheckAdministratorId(administratorId);
+                CheckTableID(model.ID);
+                
+                dataProvider.UpdateTable(model);
+
+                WriteAdminLog(administratorId, $"Personal data table {model.ID} has ");
+            }
+        }
+
+        public void DeleteTable(object administratorId, string tableId)
+        {
+            if (administratorId is null)
+                throw new ArgumentNullException(nameof(administratorId));
+
+            if (String.IsNullOrEmpty(tableId))
+                throw new ArgumentNullException(nameof(tableId));
+
+            lock (dataAccessLock)
+            {
+                CheckAdministratorId(administratorId);
+                CheckTableID(tableId);
+                
+                if (dataProvider.CheckTableContainsExistingPersonalData(tableId))
+                    throw new PersonalDataDBException($"Unable to delete table {tableId}, it contains existing personal data.");
+
+                IEnumerable<IPurpose> purposes = dataProvider.ListPurposes();
+                if (purposes.Any(p => p.PurposeScope.ScopeType == ScopeType.Tables && p.PurposeScope.TableIDs.Contains(tableId)))
+                    throw new PersonalDataDBException($"Unable to delete table {tableId}, there are purposes with scope explicitly specified for this table");
+
+                IEnumerable<IOwnerRestriction> restrictions = dataProvider.ListOwnerRestrictions();
+                if (restrictions.Any(r => r.Scope.ScopeType == ScopeType.Tables && r.Scope.TableIDs.Contains(tableId)))
+                    throw new PersonalDataDBException($"Unable to delete table {tableId}, there are owner restrictions with scope explicitly specified for this table");
+
+                dataProvider.DeleteTable(tableId);
+                WriteAdminLog(administratorId, $"Table {tableId} has been deleted");
+            }
+        }
+
+        public void AddColumn(object administratorId, string tableId, ColumnDefinitionInsertModel model)
+        {
+            if (administratorId is null)
+                throw new ArgumentNullException(nameof(administratorId));
+
+            if (String.IsNullOrEmpty(tableId))
+                throw new ArgumentNullException(nameof(tableId));
+
+            if (model is null)
+                throw new ArgumentNullException(nameof(model));
+
+            lock(dataAccessLock)
+            {
+                CheckAdministratorId(administratorId);
+                CheckTableID(tableId);
+
+                IEnumerable<IColumnDefinition> columns = dataProvider.ListColumns(tableId);
+                if (columns.Any(c => c.ID.Equals(model.ID, StringComparison.InvariantCulture)))
+                    throw new PersonalDataDBException($"Column {model.ID} already exists in table {tableId}");
+
+                if(model.ColumnType == ColumnType.ForeignKey)
+                {
+                    if (String.IsNullOrEmpty(model.ForeignKeyReferenceTableID))
+                        throw new ArgumentNullException(nameof(model.ForeignKeyReferenceTableID));
+
+                    CheckTableID(model.ForeignKeyReferenceTableID);
+                }
+
+                dataProvider.InsertColumn(tableId, model);
+
+                WriteAdminLog(administratorId, $"New column \"{model.ID}\" was added to the table \"{tableId}\".");
+            }
+        }
+
+        public void UpdateColumn(object administratorId, string tableId, ColumnDefinitionUpdateModel model)
+        {
+            if (administratorId is null)
+                throw new ArgumentNullException(nameof(administratorId));
+
+            if (String.IsNullOrEmpty(tableId))
+                throw new ArgumentNullException(nameof(tableId));
+
+            if (model is null)
+                throw new ArgumentNullException(nameof(model));
+
+            lock(dataAccessLock)
+            {
+                CheckAdministratorId(administratorId);
+                CheckTableID(tableId);
+                CheckColumnId(tableId, model.ID);
+
+                dataProvider.UpdateColumn(tableId, model);
+                WriteAdminLog(administratorId, $"Column {model.ID} in table {tableId} has been updated");
+            }
+        }
+
+        public void DeleteColumn(object administratorId, string tableId, string columnId)
+        {
+            if (administratorId is null)
+                throw new ArgumentNullException(nameof(administratorId));
+
+            if (String.IsNullOrEmpty(tableId))
+                throw new ArgumentNullException(nameof(tableId));
+
+            if (String.IsNullOrEmpty(columnId))
+                throw new ArgumentNullException(nameof(columnId));
+
+            lock(dataAccessLock)
+            {
+                CheckAdministratorId(administratorId);
+                CheckTableID(tableId);
+                CheckColumnId(tableId, columnId);
+
+                if (dataProvider.CheckColumnContainsExistingPersonalData(tableId, columnId))
+                    throw new PersonalDataDBException($"Unable to delete column {columnId} in table {tableId} because it contains existing personal data");
+
+                IEnumerable<IPurpose> purposes = dataProvider.ListPurposes();
+                if (purposes.Any(p => p.PurposeScope.ScopeType == ScopeType.Columns
+                                   && p.PurposeScope.ColumnIDs.Any(pc => pc.TableId == tableId && pc.ColumnId == columnId)))
+                {
+                    throw new PersonalDataDBException($"Unable to delete column {columnId} in table {tableId} because it is explicitly referenced in an existing purpose");
+                }
+
+                IEnumerable <IOwnerRestriction> restrictions = dataProvider.ListOwnerRestrictions();
+                if (restrictions.Any(r => r.Scope.ScopeType == ScopeType.Columns
+                                       && r.Scope.ColumnIDs.Any(pc => pc.TableId == tableId && pc.ColumnId == columnId)))
+                {
+                    throw new PersonalDataDBException($"Unable to delete column {columnId} in table {tableId} because it is explicitly referenced in an existing owner restriction");
+                }
+
+                dataProvider.DeleteColumn(tableId, columnId);
+                WriteAdminLog(administratorId, $"Column \"{columnId}\" in table \"{tableId}\" has been deleted");
+            }
+        }
+
+        public IPersonalDataCell ReadPersonalDataCell(object userId, string tableId, object rowId, string columnId)
+        {
+            if (userId is null)
+                throw new ArgumentNullException(nameof(userId));
+
+            if (String.IsNullOrEmpty(tableId))
+                throw new ArgumentException("Parameter tableId must not be null or empty", nameof(tableId));
+
+            if (rowId is null)
+                throw new ArgumentNullException(nameof(rowId));
+
+            if (String.IsNullOrEmpty(columnId))
+                throw new ArgumentException("Parameter columnId must not be null or empty", nameof(columnId));
+          
+            lock(dataAccessLock)
+            {
+                CheckUserId(userId);
+                CheckTableID(tableId);
+                CheckColumnId(tableId, columnId);
+                CheckRowId(tableId, rowId);
+
+                object ownerId = dataProvider.GetOwnerForRowId(tableId, rowId);
+
+                CheckHoldingAndReadingAccessibility(ownerId, tableId, rowId, columnId);
+
+                IPersonalDataCell personalDataCell = dataProvider.ReadPersonalDataCell(tableId, columnId, rowId);
+
+                if (personalDataCell.IsDefined)
+                {
+                    ITableDefinition table = dataProvider.GetTable(tableId);
+                    IColumnDefinition column = dataProvider.GetColumn(tableId, columnId);
+                    string tableLogName = table.Name ?? table.ID;
+                    string columnLogName = column.Name ?? column.ID;
+                    WriteOwnerLog(ownerId, $"Your personal data has been read. We accessed your data in the the column \"{columnLogName}\" in the table \"{tableLogName}\"");
+                }
+
+                WriteUserLog(userId, $"Personal data cell of owner ID {ownerId} has been accessed: table {tableId}, column {columnId}, row {rowId.ToString()}");
+
+                return personalDataCell;
+            }
+        }
+
+        public IEnumerable<IPersonalDataCell> ReadPersonalDataCells(object userId, string tableId, object rowId, IEnumerable<string> columnIDs)
+        {
+            if (userId is null)
+                throw new ArgumentNullException(nameof(userId));
+
+            if (String.IsNullOrEmpty(tableId))
+                throw new ArgumentException("Parameter tableId must not be null or empty", nameof(tableId));
+
+            if (rowId is null)
+                throw new ArgumentNullException(nameof(rowId));
+
+            if (columnIDs == null)
+                throw new ArgumentNullException(nameof(userId));
+
+            if (!columnIDs.Any())
+                throw new ArgumentException("You must define at least a single column ID.", nameof(columnIDs));
+
+            if (columnIDs.GroupBy(c => c).Count() == columnIDs.Count())
+                throw new ArgumentException($"There are duplicate column IDs", nameof(columnIDs));
+
+            if (columnIDs.Count() == 1)
+                return new IPersonalDataCell[] { ReadPersonalDataCell(userId, tableId, rowId, columnIDs.First()) };
+
+            lock (dataAccessLock)
+            {
+                CheckUserId(userId);
+                CheckTableID(tableId);
+                CheckRowId(tableId, rowId);
+
+                foreach (string columnId in columnIDs)
+                    CheckColumnId(tableId, columnId);
+
+                object ownerId = dataProvider.GetOwnerForRowId(tableId, rowId);
+
+                CheckHoldingAndReadingAccessibility(ownerId, tableId, rowId, columnIDs);
+
+                IEnumerable<IPersonalDataCell> row = dataProvider.ReadPersonalDataCells(tableId, rowId, columnIDs);
+
+                ITableDefinition table = dataProvider.GetTable(tableId);
+                string tableLogName = table.Name ?? table.ID;
+                string ownerColumnsLog = String.Join(", ", row.Where(r => r.IsDefined).Select(r =>
+                  {
+                      IColumnDefinition colDef = dataProvider.GetColumn(tableId, r.ColumnId);
+                      return colDef.Name ?? colDef.ID;
+                  }));
+
+                string userColumnsLog = String.Join(", ", row.Select(r =>
+                {
+                    IColumnDefinition colDef = dataProvider.GetColumn(tableId, r.ColumnId);
+                    return colDef.Name ?? colDef.ID;
+                }));
+
+                if (row.Any(r=>r.IsDefined))
+                    WriteOwnerLog(ownerId, $"We read your data in the the columns \"{ownerColumnsLog}\" in the table \"{tableLogName}\"");
+                
+                WriteUserLog(userId, $"Multiple cells of owner ID \"{ownerId.ToString()}\" has been accessed: table \"{tableId}\", row \"{rowId.ToString()}\", columns \"{userColumnsLog}\"");
+                return row;
+            }
+        }
+
+        public IPersonalDataRow ReadPersonalDataRow(object userId, string tableId, object rowId)
+        {
+            if (userId is null)
+                throw new ArgumentNullException(nameof(userId));
+
+            if (String.IsNullOrEmpty(tableId))
+                throw new ArgumentException($"Parameter {nameof(tableId)} must not be null or empty", nameof(tableId));
+
+            if (rowId is null)
+                throw new ArgumentNullException(nameof(rowId));
+            
+            lock(dataAccessLock)
+            {
+                CheckUserId(userId);
+                CheckTableID(tableId);
+                CheckRowId(tableId, rowId);
+
+                object ownerId = dataProvider.GetOwnerForRowId(tableId, rowId);
+                IEnumerable<IColumnDefinition> columns = dataProvider.ListColumns(tableId);
+
+                CheckHoldingAndReadingAccessibility(ownerId, tableId, rowId, columns.Select(c => c.ID));
+
+                IPersonalDataRow row = dataProvider.ReadPersonalDataRow(tableId, rowId);
+
+                ITableDefinition table = dataProvider.GetTable(tableId);
+                string tableLogName = table.Name ?? table.ID;
+
+                if (row.PersonalDataCells.Any(r => r.IsDefined))
+                    WriteOwnerLog(ownerId, $"We accessed your personal data and read the whole row with ID \"{rowId.ToString()}\" in the table \"{tableLogName}\"");
+
+                WriteUserLog(userId, $"Whole row of owner ID \"{ownerId.ToString()}\" has been accessed in table \"{tableId}\"");
+
+                return row;
+            }
+        }
+
+        public IEnumerable<IPersonalDataRow> ReadPersonalDataTable(object userId, string tableId, object ownerId)
+        {
+            if (userId is null)
+                throw new ArgumentNullException(nameof(userId));
+
+            if (String.IsNullOrEmpty(tableId))
+                throw new ArgumentException($"Parameter {nameof(tableId)} must not be null or empty", nameof(tableId));
+
+            if (ownerId is null)
+                throw new ArgumentNullException(nameof(ownerId));
+
+            lock(dataAccessLock)
+            {
+                CheckUserId(userId);
+                CheckTableID(tableId);
+                CheckOwnerId(ownerId);
+
+                IEnumerable<string> columnIds = dataProvider.ListColumns(tableId).Select(c=>c.ID);
+                IEnumerable<object> rowIds = dataProvider.GetRowIdsForOwnerId(tableId, ownerId);
+
+                CheckHoldingAndReadingAccessibility(ownerId, tableId, rowIds, columnIds);
+
+                IEnumerable<IPersonalDataRow> personalDataRows = dataProvider.ReadPersonalDataCellByOwner(tableId, ownerId);
+
+                ITableDefinition table = dataProvider.GetTable(tableId);
+                string tableLogName = table.Name ?? table.ID;
+
+                if (personalDataRows.Any(p => p.PersonalDataCells.Any(c => c.IsDefined)))
+                    WriteOwnerLog(ownerId, $"We accessed your personal data in the table \"{tableLogName}\" in all rows and columns");
+
+                WriteUserLog(userId, $"Whole table \"{tableId}\" of owner ID \"{ownerId.ToString()}\" has been accessed");
+
+                return personalDataRows;
+            }
         }
 
         //TODO
-        //public void UpdateTable()
+        public IEnumerable<IPersonalDataTable> ReadPersonalDataAll(object userId, object ownerId)
+        {
+            throw new NotImplementedException();
+        }
+        private void CheckRowId(string tableId, object rowId)
+        {
+            if (!dataProvider.CheckRowId(tableId, rowId))
+                throw new PersonalDataDBException($"Row with ID \"{rowId.ToString()}\" does not exist in table \"{tableId}\".");
+        }
+
+        private void CheckColumnId(string tableId, string columnId)
+        {
+            if (!dataProvider.CheckColumnId(tableId, columnId))
+                throw new PersonalDataDBException($"Column \"{columnId}\" in table \"{tableId}\" does not exist");
+        }
 
         private void CheckTableID(string tableId)
         {
@@ -743,18 +1035,101 @@
                 throw new PersonalDataDBException($"User ID \"{userId.ToString()}\" does not exist");
         }
 
-        private void MultiLock(object[] locks, Action action, int index = 0)
+        private void CheckHoldingAndReadingAccessibility(object ownerId, string tableId, IEnumerable<object> rowIds, IEnumerable<string> columnIds)
         {
-            if (index < locks.Count())
+            CheckHoldingAndReadingAccessibility
+            (
+                ownerId: ownerId,
+                tableIds: new string[] { tableId },
+                rowIds: rowIds.Select(r => (tableId, r)),
+                columnIds: columnIds.Select(c => (tableId, c))
+            );
+        }
+
+        private void CheckHoldingAndReadingAccessibility(object ownerId, string tableId, object rowId, string columnId)
+        {
+            CheckHoldingAndReadingAccessibility
+            (
+                ownerId:    ownerId,
+                tableIds:   new string[] { tableId },
+                rowIds:     new (string tableId, object rowId)[] { (tableId, rowId) },
+                columnIds:  new (string tableId, string columnId)[] { (tableId, columnId) }
+            );
+        }
+
+        private void CheckHoldingAndReadingAccessibility(object ownerId, string tableId, object rowId, IEnumerable<string> columnIds)
+        {
+            CheckHoldingAndReadingAccessibility
+            (
+                ownerId: ownerId,
+                tableIds: new string[] { tableId },
+                rowIds: new (string tableId, object rowId)[] { (tableId, rowId) },
+                columnIds: columnIds.Select(c => (tableId, c))
+            );
+        }
+
+        private void CheckHoldingAndReadingAccessibility(object ownerId,
+            IEnumerable<string> tableIds,
+            IEnumerable<(string tableId, object rowId)> rowIds,
+            IEnumerable<(string tableId, string columnId)> columnIds)
+        {
+            IEnumerable<IAgreement> agreements = dataProvider.ListAgreementsForOwner(ownerId);
+
+            if (!agreements.Any())
+                throw new PersonalDataDBException("Unable to access personal data, no agreement found.");
+
+            IEnumerable<object> purposeIDs = agreements.SelectMany(a => a.PurposeIDs);
+            IEnumerable<IPurpose> purposes = dataProvider.ListPurposes()
+                                                         .Where(p => purposeIDs.Contains(p.ID));
+
+            if (purposes.Any(p => p.PurposeScope.ScopeType == ScopeType.Database && p.Type == PurposeType.HoldingAndReading))
+                return;
+
+            foreach (string tableId in tableIds)
             {
-                lock (locks[index])
+                if (purposes.Any(p => p.PurposeScope.ScopeType == ScopeType.Tables
+                                   && p.Type == PurposeType.HoldingAndReading
+                                   && p.PurposeScope.TableIDs.Contains(tableId)))
                 {
-                    MultiLock(locks, action, index + 1);
+                    continue;
                 }
-            }
-            else
-            {
-                action();
+
+                IEnumerable<object> tableRows = rowIds.Where(r => r.tableId == tableId).Select(r => r.rowId);
+                IEnumerable<string> tableColumns = columnIds.Where(r => r.tableId == tableId).Select(r => r.columnId);
+
+
+                foreach (object rowId in tableRows)
+                {
+                    if (purposes.Any(p => p.PurposeScope.ScopeType == ScopeType.Rows
+                                       && p.Type == PurposeType.HoldingAndReading
+                                       && p.PurposeScope.RowIDs.Any(c => c.TableID == tableId
+                                                                      && c.RowID.Equals(rowId))))
+                    {
+                        continue;
+                    }
+
+
+                    foreach (string columnId in tableColumns)
+                    {
+                        if (purposes.Any(p => p.PurposeScope.ScopeType == ScopeType.Columns
+                                           && p.Type == PurposeType.HoldingAndReading
+                                           && p.PurposeScope.ColumnIDs.Any(c => c.TableId == tableId
+                                                                            && c.ColumnId == columnId)))
+                        {
+                            continue;
+                        }
+
+                        if (!purposes.Any(p => p.PurposeScope.ScopeType == ScopeType.Cells
+                                           && p.Type == PurposeType.HoldingAndReading
+                                           && p.PurposeScope.CellIDs.Any(c => c.TableID == tableId
+                                                                           && c.RowID.Equals(rowId)
+                                                                           && c.ColumnID == columnId)))
+                        {
+                            throw new PersonalDataDBException("Unable to access personal data, no relevant agreement found.");
+                        }
+                    }
+                }
+
             }
         }
     }
