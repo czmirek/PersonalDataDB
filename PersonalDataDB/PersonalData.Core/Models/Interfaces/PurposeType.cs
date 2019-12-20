@@ -3,6 +3,6 @@
     public enum PurposeType
     {
         HoldingAndReading,
-        ChangingUpdatingDeleting
+        Writing
     }
 }

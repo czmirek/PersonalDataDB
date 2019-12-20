@@ -4,5 +4,6 @@
     {
         string ColumnId { get; }
         bool IsDefined { get; }
+        object? Value { get; }
     }
 }

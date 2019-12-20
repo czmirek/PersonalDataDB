@@ -92,6 +92,8 @@ namespace PersonalData.Core
         IEnumerable<IPersonalDataCell> ReadPersonalDataCells(string tableId, object rowId, IEnumerable<string> columnIDs);
         IPersonalDataRow ReadPersonalDataRow(string tableId, object rowId);
         IEnumerable<object> GetRowIdsForOwnerId(string tableId, object ownerId);
-        IEnumerable<IPersonalDataRow> ReadPersonalDataCellByOwner(string tableId, object ownerId);
+        IEnumerable<IPersonalDataRow> ReadPersonalDataRowsByOwner(string tableId, object ownerId);
+        IEnumerable<IPersonalDataTable> ReadAllPersonalDataByOwner(object ownerId);
+        object InsertPersonalDataRow(string tableId, object ownerId, IDictionary<string, object> data);
     }
 }
