@@ -352,5 +352,42 @@ namespace PersonalData.Core.Services
                 return newId;
             }
         }
+
+        public void UpdatePersonalDataRow(object userId, string tableId, object rowId, IDictionary<string, object> data)
+        {
+            if (userId is null)
+                throw new ArgumentNullException(nameof(userId));
+
+            if (String.IsNullOrEmpty(tableId))
+                throw new ArgumentException($"{nameof(tableId)} must not be null or empty", nameof(tableId));
+
+            if (rowId is null)
+                throw new ArgumentNullException(nameof(rowId));
+
+            if (data is null)
+                throw new ArgumentNullException(nameof(data));
+
+            if (data.Count == 0)
+                throw new ArgumentException($"There must be at least a signle column defined in the parameter {nameof(data)}", nameof(data));
+
+            lock (dataAccessLock)
+            {
+                CheckUserId(userId);
+                CheckTableId(tableId);
+                CheckRowId(tableId, rowId);
+
+                object ownerId = dataProvider.GetOwnerForRowId(tableId, rowId);
+
+                IEnumerable<IColumnDefinition> columns = dataProvider.ListColumns(tableId);
+                if (data.Keys.Any(k => !columns.Any(c => k == c.ID)))
+                    throw new PersonalDataDBException($"{nameof(data)} parameter contains a column which is not defined in the schema");
+
+                CheckAccessibility(PurposeType.Writing, ownerId, tableId, rowId, data.Keys);
+
+                dataProvider.UpdatePersonalDataRow(ownerId, tableId, rowId, data);
+                WriteUserLog(ownerId, $"You updated a row of personal data in the table \"{tableId}\" with ID {rowId.ToString()}.");
+                WriteOwnerLog(ownerId, $"We updated a row of personal data in the table \"{tableId}\" with ID {rowId.ToString()}.");
+            }
+        }
     }
 }

@@ -237,6 +237,43 @@
             }
         }
 
+        public void UpdatePersonalDataRow(object ownerId, string tableId, object rowId, IDictionary<string, object> data)
+        {
+            if (ownerId is null)
+                throw new ArgumentNullException(nameof(ownerId));
+
+            if (String.IsNullOrEmpty(tableId))
+                throw new ArgumentException($"{nameof(tableId)} must not be null or empty", nameof(tableId));
+        
+            if (rowId is null)
+                throw new ArgumentNullException(nameof(rowId));
+            
+            if (data is null)
+                throw new ArgumentNullException(nameof(data));
+
+            if (data.Count == 0)
+                throw new ArgumentException($"There must be at least a signle column defined in the parameter {nameof(data)}", nameof(data));
+
+            lock(dataAccessLock)
+            {
+                CheckOwnerId(ownerId);
+                CheckTableId(tableId);
+                CheckRowId(tableId, rowId);
+                
+                object trueOwnerId = dataProvider.GetOwnerForRowId(tableId, rowId);
+
+                if (!ownerId.Equals(trueOwnerId))
+                    throw new PersonalDataDBException($"The requested row does not belong to the owner in the parameter {nameof(ownerId)}");
+
+                IEnumerable<IColumnDefinition> columns = dataProvider.ListColumns(tableId);
+                if (data.Keys.Any(k => !columns.Any(c => k == c.ID)))
+                    throw new PersonalDataDBException($"{nameof(data)} parameter contains a column which is not defined in the schema");
+
+                dataProvider.UpdatePersonalDataRow(ownerId, tableId, rowId, data);
+                WriteOwnerLog(ownerId, $"You updated a row of your personal data in the table \"{tableId}\" with ID {rowId.ToString()}.");
+            }
+        }
+
         //todo 13.4
     }
 }
